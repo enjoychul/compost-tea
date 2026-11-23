@@ -30,10 +30,10 @@ h1,h2,h3,.h3{text-wrap:balance}
 
 /* ---------- header ---------- */
 .top{position:sticky;top:0;z-index:20;background:rgba(250,248,242,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid rgba(31,58,43,.08)}
-.top .c{display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;height:var(--header)}
+.top .c{display:grid;grid-template-columns:auto 1fr auto;gap:0;align-items:center;height:var(--header)}
 .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:19px;text-decoration:none;color:var(--forest)}
 .logo svg{width:22px;height:22px}
-.nav{display:flex;gap:26px;font-size:15px;justify-self:center}
+.nav{display:flex;gap:28px;font-size:15px;font-weight:500;justify-self:end;margin-right:32px}
 .nav a{text-decoration:none;color:var(--ink);padding:6px 0}
 .nav a:hover{text-decoration:underline;text-underline-offset:6px}
 .top-r{display:flex;align-items:center;gap:6px;justify-self:end}
@@ -56,6 +56,7 @@ h1,h2,h3,.h3{text-wrap:balance}
 .h2,.head h2{font-size:clamp(30px,3.3vw,44px);line-height:1.28;letter-spacing:-.025em;color:var(--forest);font-weight:700}
 .head h2{grid-column:1/8}
 .head p:not(.lbl){grid-column:8/-1;align-self:end;color:var(--ink-2)}
+.head p.h2-sub{grid-column:1/8;align-self:start;margin-top:14px;font-size:20px;line-height:1.6;color:#4E6B58}
 .dark{background:var(--forest) url(../img/topo.svg) center/cover no-repeat;color:var(--on-dark)}
 .dark .head h2{color:#fff}
 .dark .head p:not(.lbl){color:var(--on-dark-2)}
@@ -133,8 +134,19 @@ h1,h2,h3,.h3{text-wrap:balance}
 .btn2:hover{background:rgba(255,255,255,.28)}
 .hero-panel{grid-column:7/-1;display:flex;justify-content:flex-end;animation:fade 1.2s var(--ease) both}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-.hero-panel .card{max-width:420px;width:100%;box-shadow:0 40px 80px -30px rgba(0,0,0,.55)}
-.hero-panel .card .media img{object-position:30% 50%}
+.hero-slider{max-width:420px;width:100%}
+.hero-panel .card{box-shadow:0 40px 80px -30px rgba(0,0,0,.55)}
+.slides img{position:absolute;inset:0;opacity:0;transition:opacity 1s ease}
+.slides img.is-on{opacity:1}
+.card .slide-texts{display:grid}
+.slide-texts>div{grid-area:1/1;display:flex;flex-direction:column;gap:6px;opacity:0;visibility:hidden;transition:opacity 1s ease,visibility 0s 1s}
+.slide-texts>div.is-on{opacity:1;visibility:visible;transition:opacity 1s ease,visibility 0s}
+.dots{display:flex;justify-content:center;gap:4px;margin-top:14px}
+.dots[hidden]{display:none}
+.dots button{width:28px;height:28px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
+.dots button::before{content:"";width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);box-shadow:0 1px 4px rgba(0,0,0,.35);transition:background .3s,transform .3s var(--ease)}
+.dots button:hover::before{background:rgba(255,255,255,.8)}
+.dots button[aria-current="true"]::before{background:#fff;transform:scale(1.25)}
 
 /* lazy photo backgrounds: set when near viewport (no-JS: always) */
 .why,#proof{background-color:#E6E0CF}
@@ -223,6 +235,8 @@ html:not(.js) #proof,#proof.bg-on{background-image:url(../img/bg/bg-soil-1600.we
 @media (max-width:960px){
   .nav{position:absolute;top:var(--header);left:0;right:0;justify-self:stretch;display:none;flex-direction:column;gap:0;background:#FAF8F2;padding:6px max(var(--gut),env(safe-area-inset-right)) 18px max(var(--gut),env(safe-area-inset-left));border-bottom:1px solid var(--line);box-shadow:0 20px 40px -24px rgba(31,58,43,.4)}
   .nav.open{display:flex}
+  .nav{margin-right:0;font-weight:400}
+  .head p.h2-sub{margin-top:0}
   .nav a{padding:14px 2px;font-size:17px;border-bottom:1px solid var(--line)}
   .nav a:hover{text-decoration:none}
   .nav-toggle{display:block}
@@ -234,7 +248,7 @@ html:not(.js) #proof,#proof.bg-on{background-image:url(../img/bg/bg-soil-1600.we
   .hero{min-height:0;padding:48px 0 80px;background-image:url(../img/bg/bg-greens-900.webp);background-position:center;--ov:linear-gradient(180deg,rgba(10,18,10,.35),rgba(10,18,10,.5))}
   .hero-text,.hero-panel{grid-column:1/-1}
   .hero-panel{margin-top:40px;justify-content:stretch}
-  .hero-panel .card{max-width:none}
+  .hero-slider{max-width:none}
   html:not(.js) .why,.why.bg-on{background-image:url(../img/bg/bg-harvest-900.webp)}
   html:not(.js) #proof,#proof.bg-on{background-image:url(../img/bg/bg-soil-900.webp)}
   .why{padding:80px 0;--ov:rgba(250,248,242,.25)}

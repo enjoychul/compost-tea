@@ -27,7 +27,7 @@
   <link rel="preload" href="img/bg/bg-greens-900.webp" as="image" type="image/webp" media="(max-width: 960px)" fetchpriority="high">
   <link rel="preload" href="fonts/Pretendard-Regular.subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/Pretendard-Bold.subset.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=20261123v3">
+  <link rel="stylesheet" href="css/style.css?v=20261123v4">
   <script>document.documentElement.classList.add('js')</script>
 
   <script type="application/ld+json">
@@ -72,9 +72,27 @@
         <div class="hero-cta"><a class="pill" href="#why">왜 퇴비차인가요</a><a class="btn2" href="#proof">도입 사례 보기</a></div>
       </div>
       <div class="hero-panel">
-        <div class="card">
-          <div class="media"><img src="img/photos/garden-team.webp" width="1200" height="675" alt="서울 관내 도시농업 텃밭에 설치된 1톤 탱크 퇴비차 장치를 점검하는 모습" fetchpriority="high"></div>
-          <div class="body"><span class="tag">설치 현장</span><p class="h3">서울 관내 도시농업 텃밭</p><p>국내 첫 도시농업 텃밭 적용</p></div>
+        <div class="hero-slider" role="region" aria-roledescription="carousel" aria-label="현장 사진">
+          <div class="card">
+            <div class="media slides">
+              <img class="is-on" src="img/photos/garden-team.webp" width="1200" height="675" alt="서울 관내 도시농업 텃밭에 설치된 1톤 탱크 퇴비차 장치를 점검하는 모습" fetchpriority="high" style="object-position:30% 50%">
+              <img data-src="img/photos/hero-turf.webp" width="800" height="800" alt="서울 현장의 푸른 잔디" aria-hidden="true">
+              <img data-src="img/photos/hero-grape.webp" width="1244" height="700" alt="경북 상주 샤인머스캣 포도 하우스" aria-hidden="true">
+              <img data-src="img/photos/chive-leaves.webp" width="800" height="1067" alt="경기 이천 농가의 부추 잎" aria-hidden="true" style="object-position:50% 40%">
+            </div>
+            <div class="body slide-texts">
+              <div class="is-on"><span class="tag">설치 현장</span><p class="h3">서울 관내 도시농업 텃밭</p><p>국내 첫 도시농업 텃밭 적용</p></div>
+              <div aria-hidden="true"><span class="tag">농가</span><p class="h3">잔디 · 서울</p><p>잔디 관리 개선</p></div>
+              <div aria-hidden="true"><span class="tag">농가</span><p class="h3">포도 · 경북 상주</p><p>2026 확대 적용</p></div>
+              <div aria-hidden="true"><span class="tag">농가</span><p class="h3">부추 · 경기 이천</p><p>출하 기간 25일 → 20일</p></div>
+            </div>
+          </div>
+          <div class="dots" hidden>
+            <button type="button" aria-label="1번째 사진: 서울 관내 도시농업 텃밭" aria-current="true"></button>
+            <button type="button" aria-label="2번째 사진: 잔디 · 서울"></button>
+            <button type="button" aria-label="3번째 사진: 포도 · 경북 상주"></button>
+            <button type="button" aria-label="4번째 사진: 부추 · 경기 이천"></button>
+          </div>
         </div>
       </div>
     </div>
@@ -106,7 +124,7 @@
       <div class="head rv">
         <p class="lbl">퇴비차란?</p>
         <h2 id="how-title">미생물은 이미 있습니다.<br>살려 내는 건 산소입니다.</h2>
-        <p>퇴비차는 비료가 아니라, 흙을 살리는 물입니다</p>
+        <p class="h2-sub">퇴비차는 비료가 아니라, 흙을 살리는 물입니다</p>
       </div>
       <div class="about rv">
         <p>식물은 뿌리로 당을 내보내고, 미생물은 그 대가로 양분을 풀어 줍니다. 수백만 년 이어진 이 거래가 끊긴 땅에서는 비료를 더 넣어도 작물이 약해집니다.</p>
@@ -383,6 +401,32 @@
   nav.addEventListener('click',function(e){if(e.target.tagName==='A')setMenu(false);});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&btn.getAttribute('aria-expanded')==='true'){setMenu(false);btn.focus();}});
   window.addEventListener('resize',function(){if(innerWidth>960)setMenu(false);});
+
+  /* hero card slideshow: first photo at load, others after page load; off for reduced motion */
+  (function(){
+    var box=document.querySelector('.hero-slider'); if(!box)return;
+    var imgs=box.querySelectorAll('.slides img'), txts=box.querySelectorAll('.slide-texts>div'), dotsBox=box.querySelector('.dots'), dots=dotsBox.querySelectorAll('button');
+    if(imgs.length<2||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    var cur=0, timer=null, paused=false, DELAY=5000;
+    function load(i){var im=imgs[i];if(im.dataset.src){im.src=im.dataset.src;im.removeAttribute('data-src');}}
+    function ready(i){var im=imgs[i];return !im.dataset.src&&im.complete&&im.naturalWidth>1;}
+    function show(n){
+      if(n===cur)return;
+      [imgs,txts].forEach(function(l){l[cur].classList.remove('is-on');l[cur].setAttribute('aria-hidden','true');l[n].classList.add('is-on');l[n].removeAttribute('aria-hidden');});
+      dots[cur].removeAttribute('aria-current');dots[n].setAttribute('aria-current','true');
+      cur=n;
+    }
+    function go(n){load(n);if(ready(n))show(n);else imgs[n].addEventListener('load',function(){show(n);},{once:true});}
+    function schedule(){clearTimeout(timer);if(!paused&&!document.hidden)timer=setTimeout(function(){go((cur+1)%imgs.length);schedule();},DELAY);}
+    function start(){for(var i=1;i<imgs.length;i++)load(i);dotsBox.hidden=false;box.classList.add('is-live');schedule();}
+    dots.forEach(function(d,i){d.addEventListener('click',function(){go(i);schedule();});});
+    box.addEventListener('mouseenter',function(){paused=true;clearTimeout(timer);});
+    box.addEventListener('mouseleave',function(){paused=false;schedule();});
+    box.addEventListener('focusin',function(){paused=true;clearTimeout(timer);});
+    box.addEventListener('focusout',function(){paused=false;schedule();});
+    document.addEventListener('visibilitychange',function(){if(document.hidden)clearTimeout(timer);else schedule();});
+    if(document.readyState==='complete')start();else window.addEventListener('load',start);
+  })();
 
   var bgs=document.querySelectorAll('.why,#proof'), rv=document.querySelectorAll('.rv');
   if(!('IntersectionObserver' in window)){
