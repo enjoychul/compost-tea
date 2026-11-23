@@ -84,8 +84,8 @@ ul,ol{margin:0;padding:0;list-style:none}
 .hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.09;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .hero::after{content:"";position:absolute;z-index:-2;inset:-20% -10% auto auto;width:70%;height:90%;background:radial-gradient(closest-side,rgba(183,212,90,.08),transparent);pointer-events:none}
 .hero-grid{display:grid;grid-template-columns:1.18fr 1fr;gap:clamp(32px,5vw,72px);align-items:center}
-.eyebrow{display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:700;color:var(--sprout);letter-spacing:.04em;margin-bottom:26px}
-.eyebrow i{display:block;width:32px;height:1px;background:currentColor;opacity:.7}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--sprout);letter-spacing:.04em;margin-bottom:26px}
+.eyebrow-sprout{flex:none;width:16px;height:16px;color:var(--sprout);margin-top:-2px}
 .hero h1{font-size:clamp(28px,4.15vw,58px);font-weight:400;letter-spacing:-.045em;line-height:1.16}
 .hero h1 .line{display:block;overflow:hidden;padding-bottom:.06em;margin-bottom:-.06em}
 .hero h1 .line>span{display:inline-block}
@@ -117,6 +117,8 @@ ul,ol{margin:0;padding:0;list-style:none}
 /* hero entrance (once) */
 .js .hero .eyebrow,.js .hero .lead,.js .hero .badges,.js .hero .actions{animation:fadeUp .9s var(--ease) both}
 .js .hero .eyebrow{animation-delay:.05s}
+.js .hero .eyebrow-sprout{transform-origin:50% 85%;animation:sproutUp .6s var(--ease) .35s both}
+@keyframes sproutUp{from{opacity:0;transform:translateY(5px) scale(.3,.1)}to{opacity:1;transform:none}}
 .js .hero h1 .line>span{animation:lineUp 1s var(--ease) both}
 .js .hero h1 .line:nth-child(1)>span{animation-delay:.15s}
 .js .hero h1 .line:nth-child(2)>span{animation-delay:.28s}
