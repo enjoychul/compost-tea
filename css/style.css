@@ -219,6 +219,31 @@ html:not(.js) .bubbles circle{opacity:1}
 .recipe .em{background:var(--soil-900);color:var(--sprout)}
 .pg-price p{font-size:clamp(19px,1.8vw,23px);font-weight:700;letter-spacing:-.03em;line-height:1.45}
 
+/* 마이크로 부스터 */
+.booster{background:var(--white)}
+.booster-grid{margin-top:56px;display:grid;grid-template-columns:.9fr 1.25fr;gap:20px;align-items:stretch}
+.booster-visual{margin:0;border-radius:var(--r-lg);padding:28px 22px 22px;background:radial-gradient(120% 90% at 50% 10%,#eef3e2,#e9e1cf);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.booster-visual svg{width:100%;max-width:280px}
+.booster-visual figcaption{margin-top:14px;font-size:14.5px;color:var(--ink-2)}
+.microbes circle{transform-box:fill-box;transform-origin:center;animation:drift 4.8s ease-in-out var(--d) infinite;animation-play-state:paused}
+.play .microbes circle{animation-play-state:running}
+@keyframes drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.booster-info{display:flex;flex-direction:column;gap:20px}
+.uses{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1}
+.use{background:var(--paper);border-radius:var(--r-md);padding:28px 26px;display:flex;flex-direction:column}
+.use-ico{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:var(--soil-900);color:var(--sprout);margin-bottom:22px}
+.use-ico svg{width:30px;height:30px}
+.use h3{display:flex;align-items:center;gap:10px;font-size:20px;letter-spacing:-.03em}
+.use-no{font-size:13px;font-weight:700;color:var(--clay);font-variant-numeric:tabular-nums}
+.use p{margin-top:12px;font-size:15.5px;color:var(--ink-2)}
+.spec{margin:0;background:var(--paper);border-radius:var(--r-md);padding:8px 26px}
+.spec>div{display:grid;grid-template-columns:64px 1fr;gap:16px;padding:16px 0}
+.spec>div+div{border-top:1px solid var(--line)}
+.spec dt{font-size:13.5px;font-weight:700;letter-spacing:.04em;color:var(--clay);padding-top:2px}
+.spec dd{margin:0;font-size:16px}
+.inline-link{color:var(--leaf);font-weight:700;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.inline-link:hover{color:var(--ink)}
+
 /* 도입 절차 */
 .process{background:var(--soil-900);color:var(--paper)}
 .process .kicker{color:var(--sprout)}
@@ -256,7 +281,7 @@ html:not(.js) .bubbles circle{opacity:1}
 
 /* scroll reveal — no hidden start state (keeps native lazy-loading working); JS adds .in just before an element enters */
 .js .reveal.in{animation:fadeUp .6s var(--ease) both}
-.js .cards .reveal.in:nth-child(3n+2),.js .steps .reveal.in:nth-child(2),.js .docs .reveal.in:nth-child(2),.js .timeline .reveal.in:nth-child(2){animation-delay:.08s}
+.js .cards .reveal.in:nth-child(3n+2),.js .steps .reveal.in:nth-child(2),.js .docs .reveal.in:nth-child(2),.js .timeline .reveal.in:nth-child(2),.js .uses .reveal.in:nth-child(2){animation-delay:.08s}
 .js .cards .reveal.in:nth-child(3n),.js .steps .reveal.in:nth-child(3),.js .docs .reveal.in:nth-child(3),.js .timeline .reveal.in:nth-child(3){animation-delay:.16s}
 .js .timeline .reveal.in:nth-child(4){animation-delay:.24s}
 .js .timeline .reveal.in:nth-child(5){animation-delay:.32s}
@@ -269,30 +294,36 @@ html:not(.js) .bubbles circle{opacity:1}
 
 /* ---------- responsive ---------- */
 @media (min-width:901px){.hero h1 .line>span{white-space:nowrap}}
-@media (max-width:1080px){
-  .timeline{grid-template-columns:repeat(3,1fr);row-gap:8px}
-  .cards{grid-template-columns:repeat(2,1fr)}
-  .card,.card:nth-child(n+4){grid-column:auto}
-  .site-nav a{padding:8px 9px;font-size:14px}
-}
-@media (max-width:900px){
+@media (max-width:1180px){
   .site-nav{position:absolute;top:68px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:rgba(33,24,16,.97);padding:6px var(--gutter) 18px;border-bottom:1px solid var(--line-dark);display:none}
   .site-nav.open{display:flex;animation:fadeUp .3s var(--ease) both}
   .site-nav a{padding:15px 2px;font-size:17px;color:var(--paper);border-bottom:1px solid var(--line-dark)}
   .site-nav a::after{display:none}
   .nav-toggle{display:block}
   .head-cta{min-height:34px;padding:6px 14px;font-size:13.5px;margin-left:0}
+}
+@media (max-width:1080px){
+  .booster-grid{grid-template-columns:1fr}
+
+  .timeline{grid-template-columns:repeat(3,1fr);row-gap:8px}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .card,.card:nth-child(n+4){grid-column:auto}
+}
+@media (max-width:900px){
   .hero-grid,.feature,.institution,.product-visuals,.contact-grid,.about-body{grid-template-columns:1fr}
   .hero-photo{order:-1}
   .hero-photo .ph{aspect-ratio:16/11}
   .docs{grid-template-columns:1fr}
   .oxygen{grid-template-columns:1fr}
+  .uses{grid-template-columns:1fr}
 }
 @media (max-width:720px){
   body{font-size:16px}
   :root{--r-lg:24px;--r-md:18px}
   .header-inner{height:60px}
   .site-nav{top:60px}
+  .spec>div{grid-template-columns:1fr;gap:4px}
+  .booster-visual svg{max-width:220px}
   .steps{grid-template-columns:1fr;gap:26px}
   .steps li:not(:last-child)::after{right:50%;top:auto;bottom:-19px;transform:translateX(50%) rotate(135deg)}
   .step-art{max-width:180px}
