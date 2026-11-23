@@ -99,6 +99,19 @@ ul,ol{margin:0;padding:0;list-style:none}
 .hero-photo .ph{border-radius:var(--r-lg);overflow:hidden;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);aspect-ratio:4/4.4}
 .hero-photo img{width:100%;height:100%;object-fit:cover;object-position:38% 50%}
 .hero-photo figcaption{position:absolute;left:18px;bottom:18px;display:flex;align-items:center;gap:8px;background:rgba(33,24,16,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line-dark);color:var(--paper);font-size:13px;padding:7px 14px;border-radius:999px}
+/* hero slideshow */
+.slides{position:absolute;inset:0}
+.slide{position:absolute;inset:0;margin:0;opacity:0;transition:opacity 1s ease}
+.slide.is-active{opacity:1;z-index:2}
+.slide.is-prev{opacity:1;z-index:1;transition:none}
+.slides .slide img{transition:transform 6.5s cubic-bezier(.25,.1,.25,1)}
+.is-slideshow .slide.is-active img,.is-slideshow .slide.is-prev img{transform:scale(1.08)}
+.dots{display:flex;justify-content:center;gap:2px;margin-top:14px}
+.dots[hidden]{display:none}
+.dots button{width:28px;height:28px;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center}
+.dots button::before{content:"";width:7px;height:7px;border-radius:999px;background:rgba(246,241,232,.3);transition:width .4s var(--ease),background .3s}
+.dots button:hover::before{background:rgba(246,241,232,.6)}
+.dots button[aria-current="true"]::before{width:22px;background:var(--sprout)}
 .hero-photo figcaption::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--sprout)}
 
 /* hero entrance (once) */
@@ -112,8 +125,8 @@ ul,ol{margin:0;padding:0;list-style:none}
 .js .hero .badges{animation-delay:.72s}
 .js .hero .actions{animation-delay:.84s}
 .js .hero-photo .ph{animation:photoIn 1.6s var(--ease) .2s both}
-.js .hero-photo .ph img{animation:zoomSettle 2s var(--ease) .2s both}
-.js .hero-photo figcaption{animation:fadeUp .8s var(--ease) 1s both}
+.js .hero-photo .slides{animation:zoomSettle 2s var(--ease) .2s both}
+.js .hero-photo .slide:first-child figcaption{animation:fadeUp .8s var(--ease) 1s both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 @keyframes lineUp{from{transform:translateY(110%)}to{transform:none}}
 @keyframes photoIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
@@ -171,8 +184,7 @@ html:not(.js) .bubbles circle{opacity:1}
 .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .trio .ph{aspect-ratio:1/1;border-radius:10px}
 @media (hover:hover) and (pointer:fine){
-  .ph:hover img,.card:hover .ph:hover img{transform:scale(1.06)}
-  .hero-photo .ph:hover img{transform:scale(1.03)}
+  .ph:not(.slides-frame):hover img{transform:scale(1.06)}
 }
 
 .cards-title{margin-top:72px;font-size:15px;font-weight:700;letter-spacing:.04em;color:var(--ink-3);display:flex;align-items:center;gap:16px}
