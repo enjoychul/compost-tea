@@ -34,8 +34,15 @@ h1,h2,h3,.h3{text-wrap:balance}
 .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:19px;text-decoration:none;color:var(--forest)}
 .logo svg{width:22px;height:22px}
 .nav{display:flex;gap:28px;font-size:15px;font-weight:500;justify-self:end;margin-right:32px}
-.nav a{text-decoration:none;color:var(--ink);padding:6px 0}
-.nav a:hover{text-decoration:underline;text-underline-offset:6px}
+.nav a{position:relative;display:inline-block;color:var(--ink-2);text-decoration:none;padding:6px 0;
+  transition:transform .25s cubic-bezier(.22,.61,.36,1),color .25s,text-shadow .25s}
+.nav a::after{content:"";position:absolute;left:0;bottom:-4px;height:2px;width:100%;
+  background:var(--forest);transform:scaleX(0);transform-origin:left;
+  transition:transform .35s cubic-bezier(.22,.61,.36,1)}
+@media (hover:hover) and (min-width:961px){
+  .nav a:hover{transform:scale(1.12);color:var(--ink);text-shadow:0 0 .4px currentColor,0 0 .4px currentColor}
+  .nav a:hover::after{transform:scaleX(1)}
+}
 .top-r{display:flex;align-items:center;gap:6px;justify-self:end}
 .pill{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:11px 22px;background:var(--forest);color:#fff;font-weight:700;font-size:15px;line-height:1.4;text-decoration:none;box-shadow:0 10px 24px -12px rgba(31,58,43,.6);transition:background .2s,transform .2s var(--ease)}
 .pill:hover{background:var(--forest-2)}
@@ -183,6 +190,19 @@ html:not(.js) #proof,#proof.bg-on{background-image:url(../img/bg/bg-soil-1600.we
 .facts span{display:block;margin-top:6px;font-size:15px;color:var(--ink-2)}
 .note{font-size:13px;color:var(--ink-2);margin:24px 0 0}
 
+@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
+#proof .card{position:relative}
+#proof .card .lz{position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;
+  background:conic-gradient(from var(--a),transparent 0 72%,#B8E07A 88%,#4E9A1E 96%,transparent 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  opacity:0;transition:opacity .3s}
+@media (hover:hover){
+  #proof .card:hover .media img{transform:scale(1.08)}
+  #proof .card:hover .lz{opacity:1;animation:laser 1.6s linear infinite}
+}
+@keyframes laser{to{--a:360deg}}
+
 /* ---------- 5. doors ---------- */
 .doors .card .media img{object-position:50% 50%}
 
@@ -237,8 +257,8 @@ html:not(.js) #proof,#proof.bg-on{background-image:url(../img/bg/bg-soil-1600.we
   .nav.open{display:flex}
   .nav{margin-right:0;font-weight:400}
   .head p.h2-sub{margin-top:0}
-  .nav a{padding:14px 2px;font-size:17px;border-bottom:1px solid var(--line)}
-  .nav a:hover{text-decoration:none}
+  .nav a{display:block;padding:14px 2px;font-size:17px;color:var(--ink);border-bottom:1px solid var(--line)}
+  .nav a::after{display:none}
   .nav-toggle{display:block}
   .top .c{grid-template-columns:1fr auto}
   .top .pill{padding:7px 14px;font-size:14px}
@@ -279,6 +299,9 @@ html:not(.js) #proof,#proof.bg-on{background-image:url(../img/bg/bg-soil-1600.we
   .logo{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){
+  .nav a:hover{transform:none!important;text-shadow:none!important}
+  .nav a::after{display:none}
+  #proof .card .lz{display:none}
   html{scroll-behavior:auto}
   *,*::before,*::after{animation:none!important;transition:none!important}
   .js .rv{opacity:1;transform:none}
