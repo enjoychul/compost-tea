@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+.svg-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.svg-image {
+  width: 100%;
+  height: auto;
+  max-width: 600px;
+}
