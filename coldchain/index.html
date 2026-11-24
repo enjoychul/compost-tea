@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AI 냉동시설 대시보드 데모 | 저장고 온도·전력 한 화면에 | 네이처와이드</title>
+  <meta name="description" content="과일·채소·육류·어류 저장고마다 다른 적정 온도를 지킵니다. 문 열림, 압축기 상태, 전력을 한 화면에서 보는 AI 냉동시설 대시보드 예시 화면입니다.">
+  <meta name="author" content="(주)네이처와이드">
+  <meta name="theme-color" content="#FAF8F2">
+  <link rel="canonical" href="https://naturewide.co.kr/coldchain/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:site_name" content="네이처와이드">
+  <meta property="og:url" content="https://naturewide.co.kr/coldchain/">
+  <meta property="og:title" content="AI 냉동시설 — 품목마다 다른 온도를 지킵니다">
+  <meta property="og:description" content="문이 열리고, 압축기가 지치는 순간을 AI가 먼저 알아챕니다.">
+  <meta property="og:image" content="https://naturewide.co.kr/img/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F3A2B'/%3E%3Cpath d='M16 27V15' stroke='%23C9DE7A' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M16 17c-1-5-5-7-9-6 0 4 4 7 9 6zM16 15c1-5 5-8 10-7-1 5-5 8-10 7z' fill='%23C9DE7A'/%3E%3C/svg%3E">
+  <link rel="preload" href="../fonts/Pretendard-Regular.subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/Pretendard-Bold.subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/style.css?v=20261124b">
+  <link rel="stylesheet" href="../css/dash.css?v=20261124b">
+  <script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+
+<header class="top" id="top">
+  <div class="c">
+    <a class="logo" href="/" aria-label="네이처와이드 처음으로"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M16 17c-1-5-5-7-9-6 0 4 4 7 9 6zM16 15c1-5 5-8 10-7-1 5-5 8-10 7z" fill="currentColor"/></svg><span translate="no">네이처와이드</span></a>
+    <nav class="nav" id="site-nav" aria-label="주 메뉴">
+      <div class="dd">
+        <a class="nl dd-top" href="/" aria-haspopup="true" aria-expanded="false" aria-controls="dd-tea">퇴비차<svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="dd-panel" id="dd-tea">
+          <ul>
+            <li><a href="/#how">퇴비차란</a></li>
+            <li><a href="/#proof">도입 사례</a></li>
+            <li><a href="/#turbo">터보믹스</a></li>
+            <li><a href="/#booster">마이크로 부스터</a></li>
+            <li><a href="/#steps">도입 절차</a></li>
+          </ul>
+        </div>
+      </div>
+      <a class="nl" href="/smartfarm/">AI 스마트팜</a>
+      <a class="nl" href="/coldchain/" aria-current="page">AI 냉동시설</a>
+      <a class="nl" href="/#docs">자료실</a>
+    </nav>
+    <div class="top-r">
+      <a class="pill" href="/#contact">견적 문의</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span class="sr">메뉴 열기</span><span class="bars" aria-hidden="true"></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="page-head" aria-labelledby="page-title">
+    <div class="c">
+      <p class="lbl">AI 냉동시설</p>
+      <h1 id="page-title">과일·채소·육류·어류, 품목마다 다른 온도를 지킵니다</h1>
+      <p class="desc">문이 열리고, 압축기가 지치는 순간을 AI가 먼저 알아챕니다.</p>
+      <div class="demo-row">
+        <span class="demo-badge">데모 화면 <span>· 실제 장비 연결 전 예시 데이터입니다</span></span>
+        <span class="live" id="live">업데이트 —</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ① 저장고 4칸 -->
+  <section class="dsec" aria-labelledby="store-title">
+    <div class="c">
+      <div class="dh"><h2 id="store-title">저장고 현황</h2><p>3초마다 갱신 · 그래프는 최근 24시간</p></div>
+      <div class="g2d stores">
+        <article class="panel store" data-s="fruit">
+          <div class="m-top"><h3 class="m-name">과일 저온저장</h3><span class="sig">PT100 · RS-485</span></div>
+          <div class="store-main"><p class="m-val"><b data-v>1.2</b><small>°C</small></p><span class="st s0" data-st>정상</span></div>
+          <div class="rng" aria-hidden="true"><span class="rng-ok" style="left:33.3%;width:16.7%"></span><span class="rng-dot" data-dot style="left:43.3%"></span></div>
+          <div class="rng-lbl"><span>−4°C</span><span>적정 <b>0 ~ 2°C</b></span><span>8°C</span></div>
+          <ul class="kv4">
+            <li><span>습도</span><b data-h>92%</b></li>
+            <li><span>문 열림 · DI</span><b data-d>오늘 14회</b></li>
+            <li><span>압축기 · CT</span><b data-c class="on">운전</b></li>
+            <li><span>전력</span><b data-p>3.2 kW</b></li>
+          </ul>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+        <article class="panel store" data-s="veg">
+          <div class="m-top"><h3 class="m-name">채소 저온저장</h3><span class="sig">PT100 · RS-485</span></div>
+          <div class="store-main"><p class="m-val"><b data-v>3.1</b><small>°C</small></p><span class="st s0" data-st>정상</span></div>
+          <div class="rng" aria-hidden="true"><span class="rng-ok" style="left:28.6%;width:35.7%"></span><span class="rng-dot" data-dot style="left:50.7%"></span></div>
+          <div class="rng-lbl"><span>−4°C</span><span>적정 <b>0 ~ 5°C</b></span><span>10°C</span></div>
+          <ul class="kv4">
+            <li><span>습도</span><b data-h>93%</b></li>
+            <li><span>문 열림 · DI</span><b data-d>오늘 22회</b></li>
+            <li><span>압축기 · CT</span><b data-c class="on">운전</b></li>
+            <li><span>전력</span><b data-p>3.0 kW</b></li>
+          </ul>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+        <article class="panel store" data-s="meat">
+          <div class="m-top"><h3 class="m-name">육류 냉동</h3><span class="sig">PT100 · RS-485</span></div>
+          <div class="store-main"><p class="m-val"><b data-v>−19.4</b><small>°C</small></p><span class="st s0" data-st>정상</span></div>
+          <div class="rng" aria-hidden="true"><span class="rng-ok" style="left:0.0%;width:55.6%"></span><span class="rng-dot" data-dot style="left:47.8%"></span></div>
+          <div class="rng-lbl"><span>−28°C</span><span>적정 <b>−18°C 이하</b></span><span>−10°C</span></div>
+          <ul class="kv4">
+            <li><span>습도</span><b data-h>—</b></li>
+            <li><span>문 열림 · DI</span><b data-d>오늘 9회</b></li>
+            <li><span>압축기 · CT</span><b data-c class="on">운전</b></li>
+            <li><span>전력</span><b data-p>5.8 kW</b></li>
+          </ul>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+        <article class="panel store" data-s="fish">
+          <div class="m-top"><h3 class="m-name">어류 초저온</h3><span class="sig">PT100 · RS-485</span></div>
+          <div class="store-main"><p class="m-val"><b data-v>−26.8</b><small>°C</small></p><span class="st s0" data-st>정상</span></div>
+          <div class="rng" aria-hidden="true"><span class="rng-ok" style="left:0.0%;width:56.2%"></span><span class="rng-dot" data-dot style="left:45.0%"></span></div>
+          <div class="rng-lbl"><span>−34°C</span><span>적정 <b>−25°C 이하</b></span><span>−18°C</span></div>
+          <ul class="kv4">
+            <li><span>습도</span><b data-h>—</b></li>
+            <li><span>문 열림 · DI</span><b data-d>오늘 6회</b></li>
+            <li><span>압축기 · CT</span><b data-c class="on">운전</b></li>
+            <li><span>전력</span><b data-p>7.4 kW</b></li>
+          </ul>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+      </div>
+      <p class="note-s">적정 온도는 일반 예시이며 품목·품종에 따라 조정합니다.</p>
+    </div>
+  </section>
+
+  <!-- ② AI 알림 -->
+  <section class="dsec" aria-labelledby="alert-title">
+    <div class="c">
+      <div class="dh"><h2 id="alert-title">AI 알림</h2><p>최근 순</p></div>
+      <div class="panel">
+        <ul class="alerts">
+          <li><span class="st s1">주의</span><p>채소 저장고 문 열림 4분 — 온도 회복까지 약 12분 예상</p><span class="ago">5분 전</span></li>
+          <li><span class="st s2">경고</span><p>어류 초저온 압축기 운전 전류 평소보다 14% 높음 — 점검 권장</p><span class="ago">25분 전</span></li>
+          <li><span class="st s0">정상</span><p>육류 냉동 제상 완료 — 정상 복귀</p><span class="ago">1시간 전</span></li>
+          <li><span class="st s0">정상</span><p>과일 저장고 24시간 범위 이탈 없음</p><span class="ago">3시간 전</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 24시간 온도 추이 -->
+  <section class="dsec" aria-labelledby="trend-title">
+    <div class="c">
+      <div class="dh"><h2 id="trend-title">24시간 온도 추이</h2><p>옅은 띠 = 저장고별 적정 범위</p></div>
+      <div class="panel">
+        <svg class="chart" id="trend" role="img" aria-label="최근 24시간 저장고 4곳의 온도 변화와 적정 범위 그래프"></svg>
+        <div class="legend"><span style="color:#1F3A2B"><i></i>과일</span><span style="color:#6E8F3A"><i></i>채소</span><span style="color:#8C5A3C"><i></i>육류</span><span style="color:#4F7FA3"><i></i>어류</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 설비·전력 -->
+  <section class="dsec" aria-labelledby="power-title">
+    <div class="c">
+      <div class="dh"><h2 id="power-title">설비·전력</h2><p>압축기 가동률 · CT 전류센서 기준</p></div>
+      <div class="power">
+        <div class="panel cbars">
+          <h3 class="m-name">압축기 가동률 (최근 24시간)</h3>
+          <div class="ub" data-u="fruit"><span>과일 저온저장</span><span class="track"><i style="width:52%"></i></span><b>52%</b></div>
+          <div class="ub" data-u="veg"><span>채소 저온저장</span><span class="track"><i style="width:58%"></i></span><b>58%</b></div>
+          <div class="ub" data-u="meat"><span>육류 냉동</span><span class="track"><i style="width:64%"></i></span><b>64%</b></div>
+          <div class="ub" data-u="fish"><span>어류 초저온</span><span class="track"><i class="s1" style="width:78%"></i></span><b>78%</b></div>
+        </div>
+        <div class="kpis">
+          <div class="panel kpi"><p class="k">오늘 전력 사용량</p><p class="m-val"><b data-kwh>186.4</b><small>kWh</small></p><p class="sub">현재 합계 <span data-kw>19.4</span> kW</p></div>
+          <div class="panel kpi"><p class="k">제상 주기</p><p class="m-val"><b>6</b><small>시간마다</small></p><p class="sub">다음 제상까지 <span data-def>01:42:00</span></p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 정전·통신 대비 -->
+  <section class="dsec" aria-labelledby="backup-title">
+    <div class="c">
+      <div class="dh"><h2 id="backup-title">정전·통신 대비</h2></div>
+      <div class="g2d">
+        <div class="panel ic-card"><span class="ic" aria-hidden="true"><svg viewBox="0 0 28 28"><rect x="3" y="8" width="19" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M24 12v4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M13.5 10.5 10 14.5h4l-3 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h3>정전 시</h3><p>정전 시 보드 내장 배터리로 알림 발송</p></div></div>
+        <div class="panel ic-card"><span class="ic" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M8 20h12a5 5 0 0 0 .6-9.96A7 7 0 0 0 7.2 11.6 4.3 4.3 0 0 0 8 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 12v6M11.5 15.5 14 18l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><h3>통신 끊김 시</h3><p>통신 끊김 시 보드에 기록 후 복구 시 전송</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ 연결 구조 -->
+  <section class="dsec" aria-labelledby="link-title">
+    <div class="c">
+      <div class="dh"><h2 id="link-title">연결 구조</h2><p>보드가 직접 받는 신호만 씁니다</p></div>
+      <div class="flow-d">
+        <div class="fn"><b>센서</b><span>온도센서 (PT100 · RS-485)</span><span>문 접점 (DI) · CT 전류센서</span></div>
+        <div class="fa" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="fn core"><b>Edge AI 보드</b><span>현장 판단 · 기록</span></div>
+        <div class="fa" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="fn"><b>LTE / 이더넷</b><span>현장 통신</span></div>
+        <div class="fa" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="fn"><b>대시보드 · 문자/카톡 알림</b><span>이 화면과 알림</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑦ 다리 띠 -->
+  <section class="dsec" aria-label="다른 페이지">
+    <div class="c">
+      <div class="bridge solo">
+        <div class="bridge-tx"><h2>밭에서 키우고,<br>제 온도로 지킵니다.</h2></div>
+        <div class="bridge-btns">
+          <a class="pill" href="/smartfarm/">AI 스마트팜 보기</a>
+          <a class="btn-line" href="/">퇴비차 보기</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑧ 문의 -->
+  <section class="dsec" aria-labelledby="ask-title">
+    <div class="c">
+      <div class="ask">
+        <h2 id="ask-title">도입·데모 문의는 메일로 받습니다</h2>
+        <div class="r">
+          <a class="pill" href="mailto:enjoychul@naver.com?subject=%5BAI%20%EB%83%89%EB%8F%99%EC%8B%9C%EC%84%A4%20%EB%AC%B8%EC%9D%98%5D">문의 메일 보내기</a>
+          <span class="mail">enjoychul@naver.com</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="c">
+    <p><span>(주)네이처와이드</span> · <a href="mailto:enjoychul@naver.com">enjoychul@naver.com</a> · <span>© 2026 <span translate="no">Naturewide</span></span></p>
+  </div>
+</footer>
+
+<script src="../js/site.js?v=20261124b"></script>
+<script src="../js/dash-coldchain.js?v=20261124b"></script>
+</body>
+</html>

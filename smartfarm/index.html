@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AI 스마트팜 대시보드 데모 | 텃밭·하우스 환경 한 화면에 | 네이처와이드</title>
+  <meta name="description" content="센서가 재고, AI가 먼저 알려 줍니다. 기온·습도·CO₂·토양수분, 구역 현황, 관수·환기 설비, 퇴비차 탱크를 한 화면에서 보는 AI 스마트팜 대시보드 예시 화면입니다.">
+  <meta name="author" content="(주)네이처와이드">
+  <meta name="theme-color" content="#FAF8F2">
+  <link rel="canonical" href="https://naturewide.co.kr/smartfarm/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:site_name" content="네이처와이드">
+  <meta property="og:url" content="https://naturewide.co.kr/smartfarm/">
+  <meta property="og:title" content="AI 스마트팜 — 텃밭과 하우스를 한 화면에서">
+  <meta property="og:description" content="센서가 재고, AI가 먼저 알려 줍니다. 물과 바람은 자동으로, 흙은 퇴비차로.">
+  <meta property="og:image" content="https://naturewide.co.kr/img/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F3A2B'/%3E%3Cpath d='M16 27V15' stroke='%23C9DE7A' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M16 17c-1-5-5-7-9-6 0 4 4 7 9 6zM16 15c1-5 5-8 10-7-1 5-5 8-10 7z' fill='%23C9DE7A'/%3E%3C/svg%3E">
+  <link rel="preload" href="../fonts/Pretendard-Regular.subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/Pretendard-Bold.subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/style.css?v=20261124b">
+  <link rel="stylesheet" href="../css/dash.css?v=20261124b">
+  <script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+
+<header class="top" id="top">
+  <div class="c">
+    <a class="logo" href="/" aria-label="네이처와이드 처음으로"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M16 17c-1-5-5-7-9-6 0 4 4 7 9 6zM16 15c1-5 5-8 10-7-1 5-5 8-10 7z" fill="currentColor"/></svg><span translate="no">네이처와이드</span></a>
+    <nav class="nav" id="site-nav" aria-label="주 메뉴">
+      <div class="dd">
+        <a class="nl dd-top" href="/" aria-haspopup="true" aria-expanded="false" aria-controls="dd-tea">퇴비차<svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="dd-panel" id="dd-tea">
+          <ul>
+            <li><a href="/#how">퇴비차란</a></li>
+            <li><a href="/#proof">도입 사례</a></li>
+            <li><a href="/#turbo">터보믹스</a></li>
+            <li><a href="/#booster">마이크로 부스터</a></li>
+            <li><a href="/#steps">도입 절차</a></li>
+          </ul>
+        </div>
+      </div>
+      <a class="nl" href="/smartfarm/" aria-current="page">AI 스마트팜</a>
+      <a class="nl" href="/coldchain/">AI 냉동시설</a>
+      <a class="nl" href="/#docs">자료실</a>
+    </nav>
+    <div class="top-r">
+      <a class="pill" href="/#contact">견적 문의</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span class="sr">메뉴 열기</span><span class="bars" aria-hidden="true"></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="page-head" aria-labelledby="page-title">
+    <div class="c">
+      <p class="lbl">AI 스마트팜</p>
+      <h1 id="page-title">텃밭과 하우스를 한 화면에서</h1>
+      <p class="desc">센서가 재고, AI가 먼저 알려 줍니다. 물과 바람은 자동으로, 흙은 퇴비차로.</p>
+      <div class="demo-row">
+        <span class="demo-badge">데모 화면 <span>· 실제 장비 연결 전 예시 데이터입니다</span></span>
+        <span class="live" id="live">업데이트 —</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ① 현재 환경 -->
+  <section class="dsec" aria-labelledby="env-title">
+    <div class="c">
+      <div class="dh"><h2 id="env-title">현재 환경</h2><p>3초마다 갱신 · 그래프는 최근 24시간</p></div>
+      <div class="g3d">
+        <article class="panel metric" data-k="temp">
+          <div class="m-top"><h3 class="m-name">기온</h3><span class="sig">RS-485 온습도</span></div>
+          <p class="m-val"><b data-v>24.6</b><small>°C</small></p>
+          <div class="m-foot"><span class="st s0" data-st>정상</span><span>적정 18~27°C</span></div>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+        <article class="panel metric" data-k="hum">
+          <div class="m-top"><h3 class="m-name">습도</h3><span class="sig">RS-485 온습도</span></div>
+          <p class="m-val"><b data-v>72</b><small>%</small></p>
+          <div class="m-foot"><span class="st s0" data-st>정상</span><span>적정 55~80%</span></div>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+        <article class="panel metric" data-k="co2">
+          <div class="m-top"><h3 class="m-name">CO₂</h3><span class="sig">RS-485</span></div>
+          <p class="m-val"><b data-v>620</b><small>ppm</small></p>
+          <div class="m-foot"><span class="st s0" data-st>정상</span><span>적정 450~900ppm</span></div>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+        <article class="panel metric" data-k="soil">
+          <div class="m-top"><h3 class="m-name">토양수분</h3><span class="sig">RS-485 토양센서</span></div>
+          <p class="m-val"><b data-v>31</b><small>%</small></p>
+          <div class="m-foot"><span class="st s0" data-st>정상</span><span>적정 25~40%</span></div>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+        <article class="panel metric" data-k="ec">
+          <div class="m-top"><h3 class="m-name">EC / pH</h3><span class="sig">RS-485 토양센서</span></div>
+          <p class="m-val"><b data-v>1.42</b><small>dS/m</small><i aria-hidden="true">/</i><b data-v2>6.6</b><small>pH</small></p>
+          <div class="m-foot"><span class="st s0" data-st>정상</span><span>EC 0.8~2.0 · pH 6.0~7.2</span></div>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+        <article class="panel metric" data-k="sun">
+          <div class="m-top"><h3 class="m-name">일사량</h3><span class="sig">4-20mA</span></div>
+          <p class="m-val"><b data-v>540</b><small>W/m²</small></p>
+          <div class="m-foot"><span class="st s0" data-st>정상</span><span>600 넘으면 차광</span></div>
+          <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true"><path class="a"/><path class="l"/></svg>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 구역 현황 -->
+  <section class="dsec" aria-labelledby="zone-title">
+    <div class="c">
+      <div class="dh"><h2 id="zone-title">구역 현황</h2><p>구역별 토양수분 · RS-485 토양센서</p></div>
+      <div class="site">
+        <span class="site-lbl">텃밭 배치도</span>
+        <div class="g3d zones">
+          <div class="zone" data-z="A">
+            <svg viewBox="0 0 240 150" role="img" aria-label="구역 A 노지 텃밭 평면도">
+              <rect x="14" y="14" width="212" height="122" rx="8" fill="#E4D6B8"/>
+              <g fill="#B79A6C"><rect x="28" y="26" width="184" height="14" rx="4"/><rect x="28" y="52" width="184" height="14" rx="4"/><rect x="28" y="78" width="184" height="14" rx="4"/><rect x="28" y="104" width="184" height="14" rx="4"/></g>
+              <g fill="#6F9A3A"><circle cx="44" cy="33" r="5"/><circle cx="74" cy="33" r="5"/><circle cx="104" cy="33" r="5"/><circle cx="134" cy="33" r="5"/><circle cx="164" cy="33" r="5"/><circle cx="194" cy="33" r="5"/><circle cx="44" cy="59" r="5"/><circle cx="74" cy="59" r="5"/><circle cx="104" cy="59" r="5"/><circle cx="134" cy="59" r="5"/><circle cx="164" cy="59" r="5"/><circle cx="194" cy="59" r="5"/><circle cx="44" cy="85" r="5"/><circle cx="74" cy="85" r="5"/><circle cx="104" cy="85" r="5"/><circle cx="134" cy="85" r="5"/><circle cx="164" cy="85" r="5"/><circle cx="194" cy="85" r="5"/><circle cx="44" cy="111" r="5"/><circle cx="74" cy="111" r="5"/><circle cx="104" cy="111" r="5"/><circle cx="134" cy="111" r="5"/><circle cx="164" cy="111" r="5"/><circle cx="194" cy="111" r="5"/></g>
+              <circle cx="210" cy="124" r="6" fill="#1F3A2B" stroke="#fff" stroke-width="2"/>
+            </svg>
+            <div class="z-row"><p class="z-name">구역 A<small>노지 텃밭</small></p><span class="st s0" data-st>정상</span></div>
+            <p class="z-val">토양수분 <b data-v>33</b>%</p>
+          </div>
+          <div class="zone" data-z="B">
+            <svg viewBox="0 0 240 150" role="img" aria-label="구역 B 비닐하우스 평면도">
+              <rect x="14" y="14" width="212" height="122" rx="8" fill="#DCE6E9"/>
+              <g stroke="#A9BCC2" stroke-width="2"><path d="M14 44h212M14 75h212M14 106h212"/></g>
+              <g fill="#C9B48A"><rect x="30" y="24" width="180" height="12" rx="3"/><rect x="30" y="55" width="180" height="12" rx="3"/><rect x="30" y="86" width="180" height="12" rx="3"/><rect x="30" y="114" width="180" height="12" rx="3"/></g>
+              <g fill="#5E8C34"><circle cx="48" cy="30" r="4"/><circle cx="78" cy="30" r="4"/><circle cx="108" cy="30" r="4"/><circle cx="138" cy="30" r="4"/><circle cx="168" cy="30" r="4"/><circle cx="198" cy="30" r="4"/><circle cx="48" cy="61" r="4"/><circle cx="78" cy="61" r="4"/><circle cx="108" cy="61" r="4"/><circle cx="138" cy="61" r="4"/><circle cx="168" cy="61" r="4"/><circle cx="198" cy="61" r="4"/><circle cx="48" cy="92" r="4"/><circle cx="78" cy="92" r="4"/><circle cx="108" cy="92" r="4"/><circle cx="138" cy="92" r="4"/><circle cx="168" cy="92" r="4"/><circle cx="198" cy="92" r="4"/><circle cx="48" cy="120" r="4"/><circle cx="78" cy="120" r="4"/><circle cx="108" cy="120" r="4"/><circle cx="138" cy="120" r="4"/><circle cx="168" cy="120" r="4"/><circle cx="198" cy="120" r="4"/></g>
+              <rect x="14" y="14" width="212" height="122" rx="8" fill="none" stroke="#8FA6AD" stroke-width="2.5"/>
+              <circle cx="210" cy="124" r="6" fill="#C98A1B" stroke="#fff" stroke-width="2"/>
+            </svg>
+            <div class="z-row"><p class="z-name">구역 B<small>비닐하우스</small></p><span class="st s1" data-st>주의</span></div>
+            <p class="z-val">토양수분 <b data-v>22</b>%</p>
+          </div>
+          <div class="zone" data-z="C">
+            <svg viewBox="0 0 240 150" role="img" aria-label="구역 C 육묘장 평면도">
+              <rect x="14" y="14" width="212" height="122" rx="8" fill="#E9E4D6"/>
+              <g fill="#CFC3A6"><rect x="26" y="26" width="58" height="46" rx="4"/><rect x="91" y="26" width="58" height="46" rx="4"/><rect x="156" y="26" width="58" height="46" rx="4"/><rect x="26" y="80" width="58" height="46" rx="4"/><rect x="91" y="80" width="58" height="46" rx="4"/><rect x="156" y="80" width="58" height="46" rx="4"/></g>
+              <g fill="#8DB054"><circle cx="40" cy="40" r="3.5"/><circle cx="55" cy="40" r="3.5"/><circle cx="70" cy="40" r="3.5"/><circle cx="40" cy="58" r="3.5"/><circle cx="55" cy="58" r="3.5"/><circle cx="70" cy="58" r="3.5"/><circle cx="105" cy="40" r="3.5"/><circle cx="120" cy="40" r="3.5"/><circle cx="135" cy="40" r="3.5"/><circle cx="105" cy="58" r="3.5"/><circle cx="120" cy="58" r="3.5"/><circle cx="135" cy="58" r="3.5"/><circle cx="170" cy="40" r="3.5"/><circle cx="185" cy="40" r="3.5"/><circle cx="200" cy="40" r="3.5"/><circle cx="170" cy="58" r="3.5"/><circle cx="185" cy="58" r="3.5"/><circle cx="200" cy="58" r="3.5"/><circle cx="40" cy="94" r="3.5"/><circle cx="55" cy="94" r="3.5"/><circle cx="70" cy="94" r="3.5"/><circle cx="40" cy="112" r="3.5"/><circle cx="55" cy="112" r="3.5"/><circle cx="70" cy="112" r="3.5"/><circle cx="105" cy="94" r="3.5"/><circle cx="120" cy="94" r="3.5"/><circle cx="135" cy="94" r="3.5"/><circle cx="105" cy="112" r="3.5"/><circle cx="120" cy="112" r="3.5"/><circle cx="135" cy="112" r="3.5"/><circle cx="170" cy="94" r="3.5"/><circle cx="185" cy="94" r="3.5"/><circle cx="200" cy="94" r="3.5"/><circle cx="170" cy="112" r="3.5"/><circle cx="185" cy="112" r="3.5"/><circle cx="200" cy="112" r="3.5"/></g>
+              <circle cx="210" cy="124" r="6" fill="#1F3A2B" stroke="#fff" stroke-width="2"/>
+            </svg>
+            <div class="z-row"><p class="z-name">구역 C<small>육묘장</small></p><span class="st s0" data-st>정상</span></div>
+            <p class="z-val">토양수분 <b data-v>36</b>%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 설비 상태 -->
+  <section class="dsec" aria-labelledby="relay-title">
+    <div class="c">
+      <div class="dh"><h2 id="relay-title">설비 상태</h2><p>릴레이 출력(DO) · 조건에 따라 자동 전환</p></div>
+      <div class="g4d">
+        <article class="panel relay" data-r="valve">
+          <div class="m-top"><h3 class="m-name">관수 밸브</h3><span class="sig">DO 릴레이</span></div>
+          <div class="sw"><span class="sw-track" aria-hidden="true"></span><span class="sw-state" data-s>OFF</span></div>
+          <p class="r-why" data-w>토양수분 25% 아래면 켜짐</p>
+          <p class="r-time">오늘 <b data-t>38분</b> 가동</p>
+        </article>
+        <article class="panel relay" data-r="fan">
+          <div class="m-top"><h3 class="m-name">환기팬</h3><span class="sig">DO 릴레이</span></div>
+          <div class="sw"><span class="sw-track" aria-hidden="true"></span><span class="sw-state" data-s>OFF</span></div>
+          <p class="r-why" data-w>기온 27°C 넘으면 켜짐</p>
+          <p class="r-time">오늘 <b data-t>2시간 10분</b> 가동</p>
+        </article>
+        <article class="panel relay" data-r="shade">
+          <div class="m-top"><h3 class="m-name">차광막</h3><span class="sig">DO 릴레이</span></div>
+          <div class="sw"><span class="sw-track" aria-hidden="true"></span><span class="sw-state" data-s>OFF</span></div>
+          <p class="r-why" data-w>일사량 600W/m² 넘으면 닫힘</p>
+          <p class="r-time">오늘 <b data-t>1시간 25분</b> 가동</p>
+        </article>
+        <article class="panel relay" data-r="curtain">
+          <div class="m-top"><h3 class="m-name">보온 커튼</h3><span class="sig">DO 릴레이</span></div>
+          <div class="sw"><span class="sw-track" aria-hidden="true"></span><span class="sw-state" data-s>OFF</span></div>
+          <p class="r-why" data-w>기온 18°C 아래 또는 야간에 닫힘</p>
+          <p class="r-time">오늘 <b data-t>7시간 40분</b> 가동</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 퇴비차 탱크 -->
+  <section class="dsec" aria-labelledby="tank-title">
+    <div class="c">
+      <div class="dh"><h2 id="tank-title">퇴비차 탱크 · 터보믹스</h2><p>흙은 퇴비차로 — 탱크 상태도 같은 화면에서</p></div>
+      <article class="panel tank" id="tank">
+        <div class="tank-l">
+          <div class="led" role="status"><span data-led>가동중입니다</span></div>
+          <div class="remain"><span><small>완성까지 남은 시간</small><br><b data-remain>03:00:00</b></span><small data-prog>24시간 중 21시간 경과</small></div>
+          <div class="bar" aria-hidden="true"><i data-bar style="width:87.5%"></i></div>
+          <a class="more-link" href="/#turbo">터보믹스 자세히 보기<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+        <div class="tank-r">
+          <ul class="kv">
+            <li><span>블로어 (산소 공급)<span class="sig">DO 릴레이</span></span><b data-blower>ON</b></li>
+            <li><span>수온<span class="sig">NTC</span></span><b><span data-wt>21.4</span> °C</b></li>
+            <li><span>탱크 수위<span class="sig">4-20mA</span></span><b><span data-lv>92</span> %</b></li>
+            <li><span>상태</span><span class="st s0" data-tst>정상</span></li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ⑤ AI 알림 -->
+  <section class="dsec" aria-labelledby="alert-title">
+    <div class="c">
+      <div class="dh"><h2 id="alert-title">AI 알림</h2><p>최근 순</p></div>
+      <div class="panel">
+        <ul class="alerts">
+          <li><span class="st s1">주의</span><p>B구역 토양수분 22% — 오늘 오후 관수 권장</p><span class="ago">10분 전</span></li>
+          <li><span class="st s2">경고</span><p>고온다습 6시간 지속 — 잿빛곰팡이병 위험 높음, 환기 권장</p><span class="ago">35분 전</span></li>
+          <li><span class="st s0">정상</span><p>퇴비차 완성까지 3시간 — 내일 오전 살포 일정 추천</p><span class="ago">1시간 전</span></li>
+          <li><span class="st s0">정상</span><p>CO₂ 저하 — 환기 후 회복 확인</p><span class="ago">2시간 전</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ 24시간 추이 -->
+  <section class="dsec" aria-labelledby="trend-title">
+    <div class="c">
+      <div class="dh"><h2 id="trend-title">24시간 추이</h2><p>기온(왼쪽 눈금) · 습도(오른쪽 눈금)</p></div>
+      <div class="panel">
+        <svg class="chart" id="trend" role="img" aria-label="최근 24시간 기온과 습도 변화 그래프"></svg>
+        <div class="legend"><span style="color:var(--forest)"><i></i>기온 °C</span><span style="color:var(--series2)"><i></i>습도 %</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑦ 연결 구조 -->
+  <section class="dsec" aria-labelledby="link-title">
+    <div class="c">
+      <div class="dh"><h2 id="link-title">연결 구조</h2><p>보드가 직접 받는 신호만 씁니다</p></div>
+      <div class="flow-d">
+        <div class="fn"><b>센서</b><span>온습도 · CO₂ · 토양 (RS-485 / Modbus)</span><span>일사량 (4-20mA)</span></div>
+        <div class="fa" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="fn core"><b>Edge AI 보드</b><span>현장 판단 · 릴레이 제어(DO)</span></div>
+        <div class="fa" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="fn"><b>LTE / 이더넷</b><span>현장 통신</span></div>
+        <div class="fa" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="fn"><b>대시보드 · 휴대폰 알림</b><span>이 화면과 알림</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑧ 다리 띠 -->
+  <section class="dsec" aria-label="다른 페이지">
+    <div class="c">
+      <div class="bridge solo">
+        <div class="bridge-tx"><h2>센서가 환경을 맞추고,<br>흙은 퇴비차가 살립니다.</h2></div>
+        <div class="bridge-btns">
+          <a class="pill" href="/">퇴비차 보기</a>
+          <a class="btn-line" href="/coldchain/">AI 냉동시설 보기</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑨ 문의 -->
+  <section class="dsec" aria-labelledby="ask-title">
+    <div class="c">
+      <div class="ask">
+        <h2 id="ask-title">도입·데모 문의는 메일로 받습니다</h2>
+        <div class="r">
+          <a class="pill" href="mailto:enjoychul@naver.com?subject=%5BAI%20%EC%8A%A4%EB%A7%88%ED%8A%B8%ED%8C%9C%20%EB%AC%B8%EC%9D%98%5D">문의 메일 보내기</a>
+          <span class="mail">enjoychul@naver.com</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="c">
+    <p><span>(주)네이처와이드</span> · <a href="mailto:enjoychul@naver.com">enjoychul@naver.com</a> · <span>© 2026 <span translate="no">Naturewide</span></span></p>
+  </div>
+</footer>
+
+<script src="../js/site.js?v=20261124b"></script>
+<script src="../js/dash-smartfarm.js?v=20261124b"></script>
+</body>
+</html>

@@ -27,7 +27,7 @@
   <link rel="preload" href="img/bg/bg-greens-900.webp" as="image" type="image/webp" media="(max-width: 960px)" fetchpriority="high">
   <link rel="preload" href="fonts/Pretendard-Regular.subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/Pretendard-Bold.subset.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/style.css?v=20261124a">
+  <link rel="stylesheet" href="css/style.css?v=20261124b">
   <script>document.documentElement.classList.add('js')</script>
 
   <script type="application/ld+json">
@@ -39,14 +39,23 @@
 
 <header class="top" id="top">
   <div class="c">
-    <a class="logo" href="#top" aria-label="네이처와이드 처음으로"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M16 17c-1-5-5-7-9-6 0 4 4 7 9 6zM16 15c1-5 5-8 10-7-1 5-5 8-10 7z" fill="currentColor"/></svg><span translate="no">네이처와이드</span></a>
+    <a class="logo" href="/" aria-label="네이처와이드 처음으로"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M16 17c-1-5-5-7-9-6 0 4 4 7 9 6zM16 15c1-5 5-8 10-7-1 5-5 8-10 7z" fill="currentColor"/></svg><span translate="no">네이처와이드</span></a>
     <nav class="nav" id="site-nav" aria-label="주 메뉴">
-      <a href="#how">퇴비차란</a>
-      <a href="#proof">도입 사례</a>
-      <a href="#turbo">터보믹스</a>
-      <a href="#booster">마이크로 부스터</a>
-      <a href="#steps">도입 절차</a>
-      <a href="#docs">자료실</a>
+      <div class="dd">
+        <a class="nl dd-top" href="#top" aria-current="page" aria-haspopup="true" aria-expanded="false" aria-controls="dd-tea">퇴비차<svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="dd-panel" id="dd-tea">
+          <ul>
+            <li><a href="#how">퇴비차란</a></li>
+            <li><a href="#proof">도입 사례</a></li>
+            <li><a href="#turbo">터보믹스</a></li>
+            <li><a href="#booster">마이크로 부스터</a></li>
+            <li><a href="#steps">도입 절차</a></li>
+          </ul>
+        </div>
+      </div>
+      <a class="nl" href="/smartfarm/">AI 스마트팜</a>
+      <a class="nl" href="/coldchain/">AI 냉동시설</a>
+      <a class="nl" href="#docs">자료실</a>
     </nav>
     <div class="top-r">
       <a class="pill" href="#contact">견적 문의</a>
@@ -178,6 +187,16 @@
       <ul class="spec oxygen rv">
         <li><b>왜 산소가 중요한가</b><span>산소가 부족하면 유익균 대신 냄새 나는 균이 늘어납니다. 퇴비차의 품질은 산소가 결정합니다.</span></li>
       </ul>
+      <div class="bridge rv">
+        <div class="bridge-tx">
+          <h3>AI는 흙을 잴 수 있지만,<br>흙을 살리는 건 미생물입니다.</h3>
+          <p>온도와 습도는 센서가 알려 줍니다. 하지만 화학비료 없이 작물을 키우는 힘은 흙 속에 살아 있는 미생물에서 나옵니다. 터보믹스는 그 미생물을 하루 만에 깨웁니다.</p>
+        </div>
+        <div class="bridge-btns">
+          <a class="pill" href="/smartfarm/">AI 스마트팜 보기</a>
+          <a class="btn-line" href="/coldchain/">AI 냉동시설 보기</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -393,14 +412,9 @@
   </div>
 </footer>
 
+<script src="js/site.js?v=20261124b"></script>
 <script>
 (function(){
-  var btn=document.querySelector('.nav-toggle'), nav=document.getElementById('site-nav');
-  function setMenu(o){btn.setAttribute('aria-expanded',String(o));btn.querySelector('.sr').textContent=o?'메뉴 닫기':'메뉴 열기';nav.classList.toggle('open',o);}
-  btn.addEventListener('click',function(){setMenu(btn.getAttribute('aria-expanded')!=='true');});
-  nav.addEventListener('click',function(e){if(e.target.tagName==='A')setMenu(false);});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&btn.getAttribute('aria-expanded')==='true'){setMenu(false);btn.focus();}});
-  window.addEventListener('resize',function(){if(innerWidth>960)setMenu(false);});
 
   /* hero card slideshow: first photo at load, others after page load; off for reduced motion */
   (function(){
@@ -428,19 +442,14 @@
     if(document.readyState==='complete')start();else window.addEventListener('load',start);
   })();
 
-  var bgs=document.querySelectorAll('.why,#proof'), rv=document.querySelectorAll('.rv');
-  if(!('IntersectionObserver' in window)){
-    bgs.forEach(function(e){e.classList.add('bg-on');}); rv.forEach(function(e){e.classList.add('in');}); return;
-  }
+  var bgs=document.querySelectorAll('.why,#proof');
+  if(!('IntersectionObserver' in window)){bgs.forEach(function(e){e.classList.add('bg-on');});return;}
   /* photo backgrounds: load shortly before the section scrolls in */
   function lazyBg(){
     var bio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('bg-on');bio.unobserve(e.target);}});},{rootMargin:'400px 0px'});
     bgs.forEach(function(e){bio.observe(e);});
   }
   if(document.readyState==='complete')lazyBg();else window.addEventListener('load',lazyBg);
-  /* scroll reveal */
-  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12,rootMargin:'0px 0px -4% 0px'});
-  rv.forEach(function(e){io.observe(e);});
 })();
 </script>
 </body>
