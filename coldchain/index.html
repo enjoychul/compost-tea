@@ -21,8 +21,8 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F3A2B'/%3E%3Cpath d='M16 27V15' stroke='%23C9DE7A' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M16 17c-1-5-5-7-9-6 0 4 4 7 9 6zM16 15c1-5 5-8 10-7-1 5-5 8-10 7z' fill='%23C9DE7A'/%3E%3C/svg%3E">
   <link rel="preload" href="../fonts/Pretendard-Regular.subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="../fonts/Pretendard-Bold.subset.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../css/style.css?v=20261124b">
-  <link rel="stylesheet" href="../css/dash.css?v=20261124b">
+  <link rel="stylesheet" href="../css/style.css?v=20261124c">
+  <link rel="stylesheet" href="../css/dash.css?v=20261124c">
   <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
@@ -60,11 +60,108 @@
   <section class="page-head" aria-labelledby="page-title">
     <div class="c">
       <p class="lbl">AI 냉동시설</p>
-      <h1 id="page-title">과일·채소·육류·어류, 품목마다 다른 온도를 지킵니다</h1>
+      <h1 id="page-title">과일·채소·육류·어류,<br>품목마다 다른 온도를 지킵니다</h1>
       <p class="desc">문이 열리고, 압축기가 지치는 순간을 AI가 먼저 알아챕니다.</p>
       <div class="demo-row">
         <span class="demo-badge">데모 화면 <span>· 실제 장비 연결 전 예시 데이터입니다</span></span>
         <span class="live" id="live">업데이트 —</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 보드 LCD 화면 -->
+  <section class="lcd-sec" aria-labelledby="lcd-title">
+    <div class="c">
+      <div class="head">
+        <p class="lbl">보드 LCD 화면</p>
+        <h2 id="lcd-title">현장에서도, 화면 하나로</h2>
+        <p>Edge AI 보드에 달린 LCD입니다. 인터넷이 끊겨도 현장에서 바로 확인합니다.<br>LCD는 저장고 한 대, 아래는 여러 대를 한 화면에서 봅니다.</p>
+      </div>
+      <div class="lcd-row" id="lcd-box">
+        <div class="bezel">
+          <div class="lcd" role="img" data-l="lcd" aria-label="FREEZER #1 LCD 화면, 정상: 내부 −22.3°C, 문 닫힘, 압축기 3.1A, AI Health 96, 경보 없음">
+            <div class="s" data-l="s" aria-hidden="true">
+              <div class="lbar"></div>
+              <span class="time" data-l="time">10/18 14:30:05</span>
+              <span class="title" style="left:192px">FREEZER #1</span>
+              <span class="gw">Edge AI GW</span>
+              <svg class="ic" style="left:486px" viewBox="0 0 24 24" fill="#5fe3f2"><rect x="9" y="2" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="16" y="16" width="6" height="6" rx="1"/><path d="M12 8v4M5 16v-4h14v4" stroke="#5fe3f2" stroke-width="2" fill="none"/></svg>
+              <svg class="ic" style="left:520px;width:26px" viewBox="0 0 26 24"><path d="M7 19h12.5a5 5 0 0 0 .6-9.96A7 7 0 0 0 6.4 10.5 4.3 4.3 0 0 0 7 19z" fill="#5fe3f2"/></svg>
+              <svg class="ic" style="left:558px;top:9px;width:28px;height:30px" viewBox="0 0 28 30" data-l="chip">
+                <g stroke="#41e07a" stroke-width="1.6"><path d="M9 3v4M14 3v4M19 3v4M9 23v4M14 23v4M19 23v4M2 10h4M2 15h4M2 20h4M22 10h4M22 15h4M22 20h4"/></g>
+                <rect x="6" y="7" width="16" height="16" rx="3" fill="#2fd36a" style="filter:drop-shadow(0 0 4px #39e37a)"/>
+                <text x="14" y="18.5" text-anchor="middle" font-size="8" font-weight="700" fill="#0d3a1c" font-family="Pretendard,sans-serif">AI</text>
+              </svg>
+              <svg class="ic" style="left:603px" viewBox="0 0 24 24" fill="#7c809a" data-l="bell"><path d="M12 2a6 6 0 0 0-6 6v4.5L4 16v1h16v-1l-2-3.5V8a6 6 0 0 0-6-6z"/><circle cx="12" cy="20" r="2.2"/></svg>
+
+              <div class="lc" data-l="main" style="left:16px;top:64px;width:360px;height:228px">
+                <span class="ll" style="left:17px;top:13px">INSIDE&nbsp;&nbsp;°C</span>
+                <span class="lp out"><svg width="9" height="15" viewBox="0 0 9 15" style="vertical-align:-3px;margin-right:4px"><rect x="2.5" y="0.5" width="4" height="10" rx="2" fill="#f2c23a"/><circle cx="4.5" cy="11" r="3.5" fill="#f2c23a"/></svg>OUT 23.6°</span>
+                <div class="big" data-l="big">-22.3</div>
+                <svg class="err" data-l="err" width="190" height="70" viewBox="0 0 190 70"><g fill="#f59ab0" style="filter:drop-shadow(0 0 6px rgba(245,154,176,.6))"><rect x="0" y="16" width="38" height="13" rx="2"/><rect x="50" y="16" width="38" height="13" rx="2"/><circle cx="106" cy="40" r="9"/><rect x="126" y="16" width="38" height="13" rx="2"/></g></svg>
+                <span class="lp norm" data-l="pill">NORMAL</span>
+                <span class="set">SET&nbsp;&nbsp;-25 ~ -20 °C</span>
+              </div>
+
+              <div class="lc" style="left:16px;top:305px;width:360px;height:158px">
+                <span class="ll" style="left:17px;top:15px">24H MIN</span>
+                <span class="v" style="left:17px;top:40px;color:#6db2ff">-24.1</span>
+                <span class="ll" style="left:17px;top:91px">24H MAX</span>
+                <span class="v" data-l="max" style="left:17px;top:116px;color:#f2b23a">-20.9</span>
+                <div style="position:absolute;left:136px;top:13px;width:1px;height:132px;background:rgba(255,255,255,.14)"></div>
+                <span class="ll" style="left:152px;top:12px;font-size:11.5px">1H TREND</span>
+                <svg style="position:absolute;left:150px;top:86px" width="196" height="56" viewBox="0 0 196 56">
+                  <path data-l="tarea" d="M0 24 L19 10 L38 24 L57 10 L76 24 L95 10 L114 24 L133 10 L152 24 L171 10 L194 22 L194 56 L0 56Z" fill="rgba(79,214,240,.22)"/>
+                  <path d="M0 24 L19 10 L38 24 L57 10 L76 24 L95 10 L114 24 L133 10 L152 24 L171 10 L194 22" fill="none" stroke="#4fd6f0" stroke-width="2" stroke-linejoin="round"/>
+                  <circle data-l="tdot" cx="193" cy="22" r="3.5" fill="#6be6ff"/>
+                </svg>
+              </div>
+
+              <div class="lc" data-l="c1" style="left:388px;top:64px;width:236px;height:94px">
+                <span class="h">Door</span><span class="sub" data-l="s1" style="top:54px">Closed&nbsp;&nbsp;·&nbsp;&nbsp;7 today</span>
+                <div class="tg" data-l="t1"><span>SHUT</span></div>
+              </div>
+
+              <div class="lc" data-l="c2" style="left:388px;top:167px;width:236px;height:93px">
+                <span class="h">Comp.</span>
+                <span data-l="amp" style="position:absolute;right:16px;top:14px;font-size:24px;font-weight:700;color:#4fd6f0">3.1A</span>
+                <span class="sub" data-l="s2" style="top:46px">Run 46%&nbsp;&nbsp;·&nbsp;&nbsp;1h</span>
+                <div style="position:absolute;left:16px;right:16px;top:70px;height:5px;border-radius:3px;background:rgba(255,255,255,.14)"><div data-l="cbar" style="width:46%;height:100%;border-radius:3px;background:#4fd6f0"></div></div>
+              </div>
+
+              <div class="lc" data-l="c3" style="left:388px;top:269px;width:236px;height:93px">
+                <span class="h" style="top:16px">AI Health</span>
+                <span data-l="ail" style="position:absolute;left:16px;top:45px;font-size:14px;font-weight:700;letter-spacing:1.6px;color:#3ddc97">NORMAL</span>
+                <span class="sub" data-l="ais" style="top:68px;font-size:13px">Base 3/12 mo</span>
+                <svg style="position:absolute;right:12px;top:14px" width="66" height="66" viewBox="0 0 66 66">
+                  <circle cx="33" cy="33" r="29" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="5"/>
+                  <circle data-l="ring" cx="33" cy="33" r="28" fill="none" stroke="#3ddc97" stroke-width="5" stroke-linecap="round" stroke-dasharray="168.9 175.9" transform="rotate(-90 33 33)" style="filter:drop-shadow(0 0 3px rgba(61,220,151,.7))"/>
+                  <text data-l="ain" x="33" y="41" text-anchor="middle" font-size="24" font-weight="700" fill="#fff" font-family="Pretendard,sans-serif">96</text>
+                  <text data-l="ain2" x="33" y="46" text-anchor="middle" font-size="10" font-weight="700" fill="#4fd6f0" font-family="Pretendard,sans-serif"></text>
+                </svg>
+              </div>
+
+              <div class="lc" data-l="c4" style="left:388px;top:371px;width:236px;height:93px">
+                <span class="h">Alarm</span><span class="sub" data-l="s4" style="top:54px">No alarm</span>
+                <div class="tg" data-l="t4"><span>OFF</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="lcd-side">
+          <div class="sbtns" role="group" aria-label="LCD 상태 선택">
+            <button type="button" class="sbtn" data-st="normal" aria-pressed="true">정상</button>
+            <button type="button" class="sbtn" data-st="long" aria-pressed="false">장기 운전</button>
+            <button type="button" class="sbtn" data-st="high" aria-pressed="false">고온 경보</button>
+            <button type="button" class="sbtn" data-st="sensor" aria-pressed="false">센서 오류</button>
+            <button type="button" class="sbtn" data-st="door" aria-pressed="false">문 열림</button>
+          </div>
+          <div class="lcd-now" aria-live="polite">
+            <b data-l="name">정상</b>
+            <p data-l="desc">설정 범위 안에서 운전 중입니다. AI가 평소 운전 패턴을 기준으로 삼고 있습니다.</p>
+          </div>
+          <p class="lcd-demo">※ 데모 화면</p>
+        </div>
       </div>
     </div>
   </section>
@@ -150,9 +247,17 @@
   <section class="dsec" aria-labelledby="trend-title">
     <div class="c">
       <div class="dh"><h2 id="trend-title">24시간 온도 추이</h2><p>옅은 띠 = 저장고별 적정 범위</p></div>
-      <div class="panel">
-        <svg class="chart" id="trend" role="img" aria-label="최근 24시간 저장고 4곳의 온도 변화와 적정 범위 그래프"></svg>
-        <div class="legend"><span style="color:#1F3A2B"><i></i>과일</span><span style="color:#6E8F3A"><i></i>채소</span><span style="color:#8C5A3C"><i></i>육류</span><span style="color:#4F7FA3"><i></i>어류</span></div>
+      <div class="g2d">
+        <div class="panel">
+          <h3 class="m-name">냉장 (과일·채소)</h3>
+          <svg class="chart" id="trend-cold" role="img" aria-label="최근 24시간 과일·채소 저장고 온도 변화와 적정 범위 그래프"></svg>
+          <div class="legend"><span style="color:#1F3A2B"><i></i>과일</span><span style="color:#6E8F3A"><i></i>채소</span></div>
+        </div>
+        <div class="panel">
+          <h3 class="m-name">냉동 (육류·어류)</h3>
+          <svg class="chart" id="trend-frz" role="img" aria-label="최근 24시간 육류·어류 저장고 온도 변화와 적정 범위 그래프"></svg>
+          <div class="legend"><span style="color:#8C5A3C"><i></i>육류</span><span style="color:#4F7FA3"><i></i>어류</span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -199,7 +304,7 @@
         <div class="fa" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="fn"><b>LTE / 이더넷</b><span>현장 통신</span></div>
         <div class="fa" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="fn"><b>대시보드 · 문자/카톡 알림</b><span>이 화면과 알림</span></div>
+        <div class="fn"><b>대시보드 · 문자·메신저 알림</b><span>이 화면과 알림</span></div>
       </div>
     </div>
   </section>
@@ -238,7 +343,7 @@
   </div>
 </footer>
 
-<script src="../js/site.js?v=20261124b"></script>
-<script src="../js/dash-coldchain.js?v=20261124b"></script>
+<script src="../js/site.js?v=20261124c"></script>
+<script src="../js/dash-coldchain.js?v=20261124c"></script>
 </body>
 </html>

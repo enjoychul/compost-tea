@@ -96,7 +96,7 @@
   }
 
   /* ---- compost-tea tank ---- */
-  var T = {total: 24 * 3600, left: 3 * 3600, wt: 21.4, lv: 92};
+  var T = {total: 24 * 3600, left: 3 * 3600 - 1, wt: 21.4, lv: 92};
   function pad2(n){ return (n < 10 ? '0' : '') + n; }
   function drawTank(){
     var box = $('#tank'), left = Math.max(0, T.left), done = left === 0;
@@ -144,6 +144,79 @@
     line(M.temp.h, yT, '#1F3A2B');
   }
 
+
+  /* ---- board LCD (GREENHOUSE #1): one state object, values swapped in ---- */
+  function lcdInit(){
+    var box = $('#lcd-box'); if (!box) return;
+    var C = '#4fd6f0', G = '#3ddc97', Y = '#f2c23a', O = '#f39a3a', WH = '#f2f5ff', GR = '#7c809a', TEA = '#c9de7a';
+    var LCD = {
+      normal: {name: '정상', desc: '기온·습도·토양수분 모두 적정 범위입니다. 퇴비차 탱크는 완성까지 3시간 남았습니다.',
+        big: '23.1', bigC: WH, pill: ['NORMAL', C], out: 'SOIL 29%', main: null,
+        t1: ['on', 'ON'], s1: ['Valve  ·  38 min today', null],
+        amp: '1.2A', s2: 'Run 32%  ·  1h', bar: 32,
+        ail: ['NORMAL', G], ais: 'Disease risk low', ring: [94, G], c3: null,
+        s4: 'brew', chip: G, bell: GR,
+        aria: '기온 23.1°C, 토양수분 29%, 관수 켜짐, 환기팬 1.2A, AI Health 94, 퇴비차 탱크 가동중'},
+      humid: {name: '고온다습', desc: '습도 85% 넘게 6시간째입니다. 환기팬을 최대로 돌리고 곰팡이병 위험을 미리 알립니다.',
+        big: '28.6', bigC: O, pill: ['HUMID 6H', Y], out: 'RH 88%', main: Y,
+        t1: ['', 'OFF'], s1: ['Valve  ·  38 min today', null],
+        amp: '2.4A', s2: 'Run 100%  ·  1h', bar: 100,
+        ail: ['CHECK SOON', O], ais: 'Mold risk high', ring: [58, O], c3: O,
+        s4: 'brew', chip: O, bell: Y,
+        aria: '기온 28.6°C 고온다습, 습도 88% 6시간 지속, 환기팬 최대 가동, AI Health 58 곰팡이병 위험'},
+      dry: {name: '건조', desc: '토양수분이 22%로 내려가 자동 관수를 시작했습니다. 퇴비차는 내일 오전 살포를 권합니다.',
+        big: '24.0', bigC: WH, pill: ['DRY SOIL', Y], out: 'SOIL 22%', main: Y,
+        t1: ['y', 'ON'], s1: ['Auto watering 4 min', Y],
+        amp: '1.2A', s2: 'Run 32%  ·  1h', bar: 32,
+        ail: ['WATCH', Y], ais: 'Soil 22%', ring: [81, Y], c3: null,
+        s4: 'Ready  ·  Spray tomorrow AM', chip: Y, bell: GR,
+        aria: '기온 24.0°C, 토양수분 22% 건조, 자동 관수 중, AI Health 81 주의, 퇴비차 준비 완료'}
+    };
+    var q = function(k){ return box.querySelector('[data-l="' + k + '"]'); };
+    var lcd = q('lcd'), scr = q('s'), cur = 'normal', base = 23.1, temp = base;
+    function fit(){ var w = lcd.clientWidth; if (w) scr.style.transform = 'scale(' + (w / 640) + ')'; }
+    fit(); if ('ResizeObserver' in window) new ResizeObserver(fit).observe(lcd); else window.addEventListener('resize', fit);
+    function sp(t){ return t.replace(/  /g, '  '); }
+    function border(e, c){ e.style.borderColor = c || ''; e.style.borderWidth = c ? '1.5px' : ''; }
+    function tg(e, cls, txt){ e.className = 'tg' + (cls ? ' ' + cls : ''); e.firstChild.textContent = txt; }
+    /* tea tank: same remaining time as the tank card below (hh:mm) */
+    function teaLeft(){ var l = Math.max(0, T.left); return pad2(Math.floor(l / 3600)) + ':' + pad2(Math.floor(l % 3600 / 60)); }
+    function tea(){ var d = LCD[cur]; q('s4').style.top = d.s4 === 'brew' ? '54px' : '62px'; q('s4').textContent = sp(d.s4 === 'brew' ? (T.left > 0 ? 'Brewing  ·  ' + teaLeft() + ' left' : 'Done  ·  Ready') : d.s4); }
+    function apply(st){
+      var d = LCD[st], big = q('big');
+      big.textContent = st === 'normal' ? temp.toFixed(1) : d.big; big.style.color = d.bigC;
+      big.style.textShadow = d.bigC === O ? '0 0 18px rgba(243,154,58,.5),0 0 2px rgba(255,220,190,.9)' : '';
+      var pl = q('pill'); pl.textContent = d.pill[0]; pl.style.color = d.pill[1]; pl.style.borderColor = d.pill[1];
+      pl.style.background = d.pill[1] === C ? 'rgba(79,214,240,.12)' : 'rgba(242,194,58,.12)';
+      q('out').textContent = d.out; border(q('main'), d.main);
+      tg(q('t1'), d.t1[0], d.t1[1]); q('s1').textContent = sp(d.s1[0]); q('s1').style.color = d.s1[1] || '';
+      q('amp').textContent = d.amp; q('s2').textContent = sp(d.s2); q('cbar').style.width = d.bar + '%';
+      q('ail').textContent = d.ail[0]; q('ail').style.color = d.ail[1]; q('ais').textContent = d.ais;
+      var ring = q('ring'); ring.setAttribute('stroke', d.ring[1]); ring.setAttribute('stroke-dasharray', (175.9 * d.ring[0] / 100).toFixed(1) + ' 175.9');
+      ring.style.filter = 'drop-shadow(0 0 3px ' + d.ring[1] + ')'; q('ain').textContent = d.ring[0]; border(q('c3'), d.c3);
+      tea();
+      var chip = q('chip'), cr = chip.querySelector('rect'); chip.querySelector('g').setAttribute('stroke', d.chip); cr.setAttribute('fill', d.chip); cr.style.filter = 'drop-shadow(0 0 4px ' + d.chip + ')';
+      q('bell').setAttribute('fill', d.bell);
+      lcd.setAttribute('aria-label', 'GREENHOUSE #1 LCD 화면, ' + d.name + ': ' + d.aria);
+      q('name').textContent = d.name; q('desc').textContent = d.desc;
+    }
+    function show(st){
+      if (st === cur) return;
+      cur = st; temp = base;
+      box.querySelectorAll('.sbtn').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.st === st)); });
+      if (RM){ apply(st); return; }
+      scr.classList.add('fade'); setTimeout(function(){ apply(st); scr.classList.remove('fade'); }, 150);
+    }
+    box.querySelectorAll('.sbtn').forEach(function(b){ b.addEventListener('click', function(){ show(b.dataset.st); }); });
+    function clock(){ var d = new Date(); q('time').textContent = pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds()); }
+    clock(); apply('normal');
+    setInterval(function(){ clock(); tea(); }, 1000);
+    if (!RM) setInterval(function(){
+      if (cur !== 'normal' || document.hidden) return;
+      temp = clamp(temp + (Math.random() - .5) * .24 + (base - temp) * .3, base - .2, base + .2); q('big').textContent = temp.toFixed(1);
+    }, TICK);
+  }
+
   /* ---- loop ---- */
   var n = 0;
   function tick(first){
@@ -163,7 +236,7 @@
     drawZones(); rules(); drawRelays(first ? 0 : TICK / 1000); drawTank(); drawChart();
     var live = $('#live'); if (live) live.textContent = '업데이트 ' + new Date().toLocaleTimeString('ko-KR', {hour12: false});
   }
-  tick(true);
+  tick(true); lcdInit();
   setInterval(function(){ if (!document.hidden) tick(false); }, TICK);
   setInterval(function(){ if (T.left > 0){ T.left--; drawTank(); } }, 1000);
   var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(drawChart, 150); });
