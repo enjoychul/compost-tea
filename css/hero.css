@@ -13,14 +13,14 @@
 .hx-tabs button span{color:var(--mute)}
 .hx-tabs button[aria-selected="true"] svg{color:var(--leaf)}
 .hx-tabs button[aria-selected="true"] span{color:#000;font-weight:700}
-.hx-bar{position:absolute;left:0;bottom:0;width:140px;height:4px;background:var(--leaf);transition:transform .45s var(--ease)}
+.hx-bar{position:absolute;left:0;bottom:0;width:140px;height:4px;background:var(--leaf);transition:transform .9s var(--ease)}
 
 /* 본문 */
 .hx-stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:center}
 .hx-panel[hidden]{display:none}
 .hx-panel h2{font-size:clamp(40px,4.7vw,66px);line-height:1.12;letter-spacing:-.035em;font-weight:700;color:var(--deep);margin:0 0 30px}
 .hx-panel p{font-size:21px;line-height:1.75;color:var(--deep);font-weight:400;max-width:24em}
-.hx-panel.is-on{animation:hxin .6s var(--ease) both}
+.hx-panel.is-on{animation:hxin 1.2s var(--ease) both}
 @keyframes hxin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
 .hx-ctrl{display:flex;gap:14px;margin-top:44px}
@@ -71,7 +71,7 @@
 
 /* ===== 계속 움직이는 느낌 (v6 시안) ===== */
 /* 1) 큰 사진: 7초 동안 다가가고, 9초 동안 천천히 멀어지기를 반복 (탭이 바뀌어도 끊기지 않음) */
-.hx-main img{transition:opacity .9s var(--ease);transform:none;animation:hxzoom 16s ease-in-out infinite}
+.hx-main img{transition:opacity 1.8s var(--ease);transform:none;animation:hxzoom 16s ease-in-out infinite}
 .hx-main img.is-on{transform:none}
 @keyframes hxzoom{0%{transform:scale(1.04) translate(0,0)}45%{transform:scale(1.28) translate(-3%,-2.5%)}100%{transform:scale(1.04) translate(0,0)}}
 /* 1-2) 큰 캡슐 자체도 천천히 오르내림 */

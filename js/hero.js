@@ -5,7 +5,7 @@
   var imgs=[].slice.call(root.querySelectorAll('.hx-main img'));
   var bar=root.querySelector('.hx-bar');
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var DUR=7000, cur=0, timer=null, paused=false;
+  var DUR=9000, cur=0, timer=null, paused=false;
   function moveBar(){
     var t=tabs[cur], w=Math.round(t.offsetWidth*0.7);
     bar.style.width=w+'px';
