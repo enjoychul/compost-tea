@@ -14,7 +14,7 @@
   function go(i,focus){
     cur=(i+tabs.length)%tabs.length;
     tabs.forEach(function(t,k){var on=k===cur;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1;});
-    panels.forEach(function(p,k){var on=k===cur;p.hidden=!on;p.classList.toggle('is-on',on);});
+    panels.forEach(function(p,k){var on=k===cur;p.classList.toggle('is-on',on);p.setAttribute('aria-hidden',on?'false':'true');p.inert=!on;});
     imgs.forEach(function(m,k){m.classList.toggle('is-on',k===cur);});
     if(focus)tabs[cur].focus();
     moveBar();schedule();
