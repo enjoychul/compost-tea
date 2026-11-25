@@ -68,3 +68,24 @@
   .hx-panel.is-on{animation:none}
   .hx-main img{transition:none;transform:none}
 }
+
+/* ===== 계속 움직이는 느낌 (v6 시안) ===== */
+/* 1) 큰 사진: 7초 동안 다가가고, 9초 동안 천천히 멀어지기를 반복 (탭이 바뀌어도 끊기지 않음) */
+.hx-main img{transition:opacity .9s var(--ease);transform:none;animation:hxzoom 16s ease-in-out infinite}
+.hx-main img.is-on{transform:none}
+@keyframes hxzoom{0%{transform:scale(1.04) translate(0,0)}45%{transform:scale(1.28) translate(-3%,-2.5%)}100%{transform:scale(1.04) translate(0,0)}}
+/* 1-2) 큰 캡슐 자체도 천천히 오르내림 */
+.hx-main{animation:hxsway 9s ease-in-out infinite}
+@keyframes hxsway{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+/* 2) 작은 캡슐 사진: 서로 다른 박자로 둥실둥실 */
+.hx-mini-a{animation:hxfloat 6s ease-in-out infinite}
+.hx-mini-b{animation:hxfloat 7.5s ease-in-out -2s infinite}
+.hx-mini img{animation:hxdrift 12s ease-in-out infinite alternate}
+@keyframes hxfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes hxdrift{from{transform:scale(1.05) translateY(3%)}to{transform:scale(1.15) translateY(-3%)}}
+/* 3) 뒤쪽 연두빛: 천천히 숨쉬듯 */
+.hx-glow{animation:hxbreath 10s ease-in-out infinite}
+@keyframes hxbreath{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08) translate(-20px,10px);opacity:.8}}
+@media (prefers-reduced-motion:reduce){
+  .hx-main,.hx-main img,.hx-mini-a,.hx-mini-b,.hx-mini img,.hx-glow{animation:none}
+}
