@@ -92,6 +92,7 @@ th{color:var(--mute);font-weight:500}
     <button id="mMine" class="on">내 오답 경로</button>
     <button id="mGichul">기출 출제 빈도</button>
     <select id="who" hidden aria-label="누구의 기록"></select>
+    <select id="kf" aria-label="출처 종류 필터" style="width:auto"><option value="all">출처: 전체</option><option value="수능">수능만</option><option value="모평">평가원 모평만</option><option value="학평">교육청 학평만</option><option value="기타">학원·문제집만</option></select>
     <button id="demoOn">예시로 보기</button>
     <button id="exp">백업 내보내기</button>
     <label class="chip" style="display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:20px;cursor:pointer;min-height:44px;padding:0 14px;background:var(--card)">백업 불러오기<input type="file" id="imp" accept=".json,application/json" hidden></label>
@@ -112,6 +113,7 @@ th{color:var(--mute);font-weight:500}
       <div><label for="fDate">날짜</label><input type="date" id="fDate"></div>
       <div><label for="fSrc">출처 <span class="hint">예: 2025 수능 17번</span></label><input id="fSrc" maxlength="60"></div>
     </div>
+    <div><label>출처 종류</label><div class="chips" id="cKind"></div></div>
     <div><label>영역</label><div class="chips" id="cArea"></div></div>
     <div><label>지문 유형</label><div class="chips" id="cInp"></div></div>
     <div><label>결과</label><div class="chips"><button type="button" class="chip blue" id="rOk">맞음</button><button type="button" class="chip" id="rNg">틀림</button></div></div>
@@ -145,6 +147,8 @@ th{color:var(--mute);font-weight:500}
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const AREAS=['독서','문학','화법·작문','언어'];
+const KINDS=[['수능','수능'],['모평','평가원 모평'],['학평','교육청 학평'],['기타','학원·문제집']];
+let kf='all';
 const INP=[['S1','개념·원리','독서'],['S2','과정·절차','독서'],['S3','관점 대립','독서'],['S4','통시적 변화','독서'],['S5','문제-해결','독서'],['S6','분류·체계','독서'],['S7','사례-일반화','독서'],['S8','주제 통합','독서'],['L1','현대시','문학'],['L2','고전시가','문학'],['L3','현대소설','문학'],['L4','고전소설','문학'],['L5','극·수필','문학'],['W1','화법·작문','화법·작문'],['G1','문법','언어']];
 const OPS=[
 ['O1','정의 대조','선지 속 개념을 지문의 정의 문장과 글자 단위로 맞춘다.','개념어에 □, 정의 문장에 밑줄을 그었나?'],
@@ -168,7 +172,8 @@ const lget=()=>{try{return JSON.parse(localStorage.getItem(LK)||'[]')}catch(e){r
 const lset=a=>{try{localStorage.setItem(LK,JSON.stringify(a))}catch(e){}};
 const norm=r=>{const a=Array.isArray(r)?r:(r&&(r.docs||r.items||r.rows))||[];return a.map(d=>{if(d&&typeof d.data==='function')return{...d.data(),id:d.id};if(d&&d.data&&typeof d.data==='object')return{...d.data,id:d.id??d.data.id};return{...d}})};
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2200)};
-const cur=()=>demo?demoLogs:logs;
+const cur=()=>(demo?demoLogs:logs).filter(l=>kf==='all'||(l.kind||'기타')===kf);
+const gcur=()=>gichul.filter(g=>kf==='all'||(g.kind||'수능')===kf);
 
 /* ---------- 데이터 ---------- */
 async function loadLogs(){
@@ -208,7 +213,7 @@ function graph(){
   if(mapMode==='mine'){
     for(const l of cur()){if(l.ok||!l.bug)continue;if(l.inp)add(l.inp,l.bug);if(l.err)add(l.bug,l.err);const k=[l.inp||'?',l.bug,l.err||'?'].join('|');tri[k]=(tri[k]||0)+1}
   }else{
-    for(const g of gichul){for(const o of (g.opts||[])){if(!o.err||o.err==='E0')continue;for(const op of (o.ops||[])){if(g.inp)add(g.inp,op);add(op,o.err);const k=[g.inp||'?',op,o.err].join('|');tri[k]=(tri[k]||0)+1}}}
+    for(const g of gcur()){for(const o of (g.opts||[])){if(!o.err||o.err==='E0')continue;for(const op of (o.ops||[])){if(g.inp)add(g.inp,op);add(op,o.err);const k=[g.inp||'?',op,o.err].join('|');tri[k]=(tri[k]||0)+1}}}
   }
   return{ew,nw,tri};
 }
@@ -274,9 +279,10 @@ function renderSel(){
 function renderMap(){draw();renderPanels()}
 
 /* ---------- 기록 폼 ---------- */
-const F={area:'독서',inp:null,ok:null,ops:new Set(),bug:null,err:null};
+const F={kind:'기타',area:'독서',inp:null,ok:null,ops:new Set(),bug:null,err:null};
 const chips=(el,arr,isOn,onClick,blue)=>{el.innerHTML=arr.map(a=>`<button type="button" class="chip ${blue?'blue':''} ${isOn(a[0])?'on':''}" data-k="${esc(a[0])}">${esc(a[1])}</button>`).join('');el.onclick=e=>{const k=e.target.dataset.k;if(k){onClick(k);renderForm()}}};
 function renderForm(){
+  chips($('#cKind'),KINDS,k=>F.kind===k,k=>F.kind=k);
   chips($('#cArea'),AREAS.map(a=>[a,a]),k=>F.area===k,k=>{F.area=k;F.inp=null});
   chips($('#cInp'),INP.filter(i=>i[2]===F.area),k=>F.inp===k,k=>F.inp=F.inp===k?null:k);
   chips($('#cOps'),OPS,k=>F.ops.has(k),k=>F.ops.has(k)?F.ops.delete(k):F.ops.add(k),true);
@@ -295,7 +301,7 @@ $('#form').addEventListener('submit',async e=>{
   if(!F.ops.size&&F.ok)return toast('쓴 연산을 하나 이상 골라 주세요');
   if(F.ok===false&&!F.bug)return toast('끊긴 연산을 하나 골라 주세요');
   if(mode==='db'&&viewing!==uid){viewing=uid;$('#who').value=uid;await loadLogs()}
-  const rec={id:'l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:Date.now(),d:$('#fDate').value||today(),src:$('#fSrc').value.trim(),area:F.area,inp:F.inp,ok:F.ok,ops:[...F.ops],bug:F.ok?null:F.bug,err:F.ok?null:F.err,r:F.ok?null:($('#fR').value||null),memo:$('#fMemo').value.trim()};
+  const rec={id:'l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:Date.now(),d:$('#fDate').value||today(),src:$('#fSrc').value.trim(),kind:F.kind,area:F.area,inp:F.inp,ok:F.ok,ops:[...F.ops],bug:F.ok?null:F.bug,err:F.ok?null:F.err,r:F.ok?null:($('#fR').value||null),memo:$('#fMemo').value.trim()};
   try{await addLog(rec);toast('저장했습니다');}catch(err){toast('저장하지 못했습니다. 권한을 확인해 주세요');return}
   Object.assign(F,{inp:null,ok:null,bug:null,err:null});F.ops.clear();$('#fSrc').value='';$('#fMemo').value='';$('#fR').value='';
   renderForm();renderAll();
@@ -310,7 +316,7 @@ function renderList(){
   const L=cur(),ng=L.filter(l=>!l.ok).length;
   $('#listSum').textContent=L.length?`전체 ${L.length}문제 · 틀림 ${ng} · 맞음 ${L.length-ng}`:'아직 기록이 없습니다.';
   const mine=!demo&&(mode!=='db'||viewing===uid);
-  $('#tbody').innerHTML=L.map(l=>`<tr><td>${esc(l.d)}</td><td>${esc(l.src)}</td><td>${esc(l.area)}${l.inp?' · '+esc(NAME[l.inp]):''}</td><td>${l.ok?'<span class="ok">맞음</span>':'<span class="ng">틀림</span>'}</td><td>${esc(l.bug?NAME[l.bug]:'')}</td><td>${esc(l.err?NAME[l.err]:'')}${l.r?'<br><span class="muted">'+esc(l.r+' '+NAME[l.r])+'</span>':''}</td><td>${esc(l.memo)}</td><td>${mine?`<button class="chip" data-del="${esc(l.id)}">삭제</button>`:''}</td></tr>`).join('');
+  $('#tbody').innerHTML=L.map(l=>`<tr><td>${esc(l.d)}</td><td>${esc(l.src)}${l.kind?'<br><span class="muted">'+esc(l.kind)+'</span>':''}</td><td>${esc(l.area)}${l.inp?' · '+esc(NAME[l.inp]):''}</td><td>${l.ok?'<span class="ok">맞음</span>':'<span class="ng">틀림</span>'}</td><td>${esc(l.bug?NAME[l.bug]:'')}</td><td>${esc(l.err?NAME[l.err]:'')}${l.r?'<br><span class="muted">'+esc(l.r+' '+NAME[l.r])+'</span>':''}</td><td>${esc(l.memo)}</td><td>${mine?`<button class="chip" data-del="${esc(l.id)}">삭제</button>`:''}</td></tr>`).join('');
 }
 $('#tbody').addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b)return;
   if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='정말 삭제';setTimeout(()=>{b.dataset.arm='';b.textContent='삭제'},3000);return}
@@ -320,8 +326,8 @@ $('#tbody').addEventListener('click',async e=>{const b=e.target.closest('[data-d
 function makeDemo(){
   const pick=(a,i)=>a[i%a.length];const out=[];
   const plan=[['S3','O8','E1'],['S3','O8','E1'],['S1','O3','E4'],['S1','O3','E4'],['S2','O6','E8'],['S5','O2','E2'],['S1','O5','E10'],['L1','O9','E10'],['L3','O8','E1'],['S7','O5','E10'],['G1','O10','E9'],['S1','O3','E3'],['L2','O10','E9'],['S4','O2','E2']];
-  for(let i=0;i<40;i++){const fail=i<plan.length;const p=pick(plan,i);const area=p[0][0]==='S'?'독서':p[0][0]==='L'?'문학':'언어';
-    out.push({id:'d'+i,t:i,d:'예시',src:`예시 문항 ${i+1}`,area,inp:p[0],ok:!fail,ops:[p[1],pick(['O1','O4','O2'],i)],bug:fail?p[1]:null,err:fail?p[2]:null,memo:fail?'예시 교훈':''})}
+  for(let i=0;i<40;i++){const fail=i<plan.length;const p=pick(plan,i);const area=p[0][0]==='S'?'독서':p[0][0]==='L'?'문학':'언어';const kind=pick(['수능','모평','기타','학평'],i);
+    out.push({id:'d'+i,t:i,d:'예시',src:`예시 문항 ${i+1}`,kind,area,inp:p[0],ok:!fail,ops:[p[1],pick(['O1','O4','O2'],i)],bug:fail?p[1]:null,err:fail?p[2]:null,memo:fail?'예시 교훈':''})}
   return out;
 }
 $('#demoOn').onclick=()=>{demo=true;demoLogs=makeDemo();mapMode='mine';renderAll()};
@@ -332,6 +338,7 @@ $('#imp').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const ar
 /* ---------- 공통 ---------- */
 $('#mMine').onclick=()=>{mapMode='mine';selected=null;renderAll()};
 $('#mGichul').onclick=()=>{mapMode='gichul';selected=null;renderAll()};
+$('#kf').onchange=e=>{kf=e.target.value;selected=null;renderAll()};
 $('#who').onchange=async e=>{viewing=e.target.value;await loadLogs();renderAll()};
 function setStatus(){
   const s=$('#status');
