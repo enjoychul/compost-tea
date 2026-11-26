@@ -34,11 +34,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 button.pri{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
 select,input,textarea{min-height:44px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);width:100%}
-.fig{position:relative;min-height:560px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.fig{position:relative;min-height:640px;background:var(--card);border:1px solid var(--line);border-radius:12px}
 .fig>svg{position:absolute;inset:0;width:100%;height:100%}
 .empty{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:var(--card);border:1px dashed var(--line);border-radius:8px;padding:8px 14px;font-size:14px;color:var(--mute);text-align:center;width:min(92%,460px)}
 .edge{fill:none}.edge.r{stroke:var(--red)}.edge.b{stroke:var(--blue)}
-.nd{stroke:var(--ink);stroke-width:1.5;fill:var(--card);cursor:pointer}.nd.hot{fill:var(--red);stroke:var(--red)}.nd.hotb{fill:var(--blue);stroke:var(--blue)}.nd.sel{stroke-width:4}
+.nd{stroke:var(--ink);stroke-width:1.5;fill:var(--card);cursor:pointer}.nd.hot{fill:var(--red);stroke:var(--red)}.nd.hotb{fill:var(--blue);stroke:var(--blue)}.nd.sel{stroke-width:4}.nd.grp{stroke-width:2.5}
+.cg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%;padding:4px 0;border-top:1px dashed var(--line)}.cg:first-child{border-top:0}.cgl{font-size:13px;font-weight:700;color:var(--mute);width:6.5em;flex:none}
 .lb{font-size:13px;fill:var(--ink);pointer-events:none}.lb.m{fill:var(--mute)}.pill{fill:var(--card);opacity:.92}
 .layer{font-size:12px;fill:var(--mute);font-weight:700}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
@@ -71,7 +72,7 @@ th{color:var(--mute);font-weight:500}
 [hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){.toast{transition:none}}
 @media(max-width:860px){.grid3{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:600px){.two{grid-template-columns:minmax(0,1fr)}.fig{min-height:520px}table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:5.5em;margin-inline-start:-6em;color:var(--mute)}.stack td:empty{display:none}}
+@media(max-width:600px){.two{grid-template-columns:minmax(0,1fr)}.fig{min-height:600px}table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:5.5em;margin-inline-start:-6em;color:var(--mute)}.stack td:empty{display:none}}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
 </head>
@@ -89,6 +90,8 @@ th{color:var(--mute);font-weight:500}
 <section class="band" id="v-map">
   <div id="demoNote" class="demo" hidden>예시 데이터를 보여주는 중입니다 (저장되지 않음). <button id="demoOff" class="chip">예시 끄기</button></div>
   <div class="bar">
+    <button id="vBig" class="on">대 신경망</button>
+    <button id="vSmall">소 신경망</button>
     <button id="mMine" class="on">내 오답 경로</button>
     <button id="mGichul">기출 출제 빈도</button>
     <select id="who" hidden aria-label="누구의 기록"></select>
@@ -129,7 +132,7 @@ th{color:var(--mute);font-weight:500}
 </section>
 
 <section class="band" id="v-ops" hidden>
-  <h2>사고 연산 10개</h2>
+  <h2>사고 연산 12개 · 5묶음</h2>
   <p class="sub">문제를 풀 때 머릿속에서 돌아가는 연산들입니다. 각 카드의 질문이 그 연산의 체크 포인트입니다.</p>
   <div class="ops" id="opsGrid" style="margin-top:18px"></div>
 </section>
@@ -146,10 +149,10 @@ th{color:var(--mute);font-weight:500}
 {
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const AREAS=['독서','문학','화법·작문','언어'];
+const AREAS=['독서','문학','화법·작문','언어·매체'];
 const KINDS=[['수능','수능'],['모평','평가원 모평'],['학평','교육청 학평'],['기타','학원·문제집']];
 let kf='all';
-const INP=[['S1','개념·원리','독서'],['S2','과정·절차','독서'],['S3','관점 대립','독서'],['S4','통시적 변화','독서'],['S5','문제-해결','독서'],['S6','분류·체계','독서'],['S7','사례-일반화','독서'],['S8','주제 통합','독서'],['L1','현대시','문학'],['L2','고전시가','문학'],['L3','현대소설','문학'],['L4','고전소설','문학'],['L5','극·수필','문학'],['W1','화법·작문','화법·작문'],['G1','문법','언어']];
+const INP=[['S1','개념·원리','독서'],['S2','과정·절차','독서'],['S3','관점 대립','독서'],['S4','통시적 변화','독서'],['S5','문제-해결','독서'],['S6','분류·체계','독서'],['S7','사례-일반화','독서'],['S8','주제 통합','독서'],['S9','독서론','독서'],['L1','현대시','문학'],['L2','고전시가','문학'],['L3','현대소설','문학'],['L4','고전소설','문학'],['L5','극·수필','문학'],['W1','화법·작문','화법·작문'],['G1','문법','언어·매체'],['M1','매체','언어·매체']];
 const OPS=[
 ['O1','정의 대조','선지 속 개념을 지문의 정의 문장과 글자 단위로 맞춘다.','개념어에 □, 정의 문장에 밑줄을 그었나?'],
 ['O2','인과 추적','무엇이 원인이고 무엇이 결과인지, 화살표 방향을 확인한다.','A → B 화살표를 직접 그렸나? 선지에서 방향이 뒤집히지 않았나?'],
@@ -160,8 +163,10 @@ const OPS=[
 ['O7','비례·수치 추론','"~할수록 ~하다" 증감 관계를 따진다.','↑↓ 표시를 했나? 같은 방향인지 반대 방향인지 확인했나?'],
 ['O8','주체·관점 식별','이 말을 누가 했는지, 누구의 입장인지 확인한다.','선지의 주어가 지문의 누구인지 손가락으로 짚었나?'],
 ['O9','정서·태도 판별','화자·인물의 상황, 정서, 태도와 그 변화를 판별한다.','시어를 + / − 로 나눴나? 정서가 바뀌는 줄을 찾았나?'],
-['O10','개념어 판별','반어, 역설, 음운 변동 같은 용어의 정의를 정확히 적용한다.','그 개념어의 정의를 한 문장으로 말할 수 있나?']];
-const ERRS=[['E1','주체 바꿔치기'],['E2','인과 역전'],['E3','범위 왜곡'],['E4','조건 누락·추가'],['E5','비례 반대'],['E6','지문에 없음'],['E7','비교 오류'],['E8','순서 오류'],['E9','개념어 오용'],['E10','〈보기〉 기준 위반']];
+['O10','개념어 판별','반어, 역설, 음운 변동 같은 용어의 정의를 정확히 적용한다.','그 개념어의 정의를 한 문장으로 말할 수 있나?'],
+['O11','서술 방식·구조','글이 어떤 방식으로 쓰였는지(시점, 전개, 표현법)를 판별한다.','선지가 말하는 서술 방식이 지문 어느 줄에 실제로 있는지 짚었나?'],
+['O12','어휘·문맥 의미','밑줄 친 말이 이 문맥에서 어떤 뜻으로 쓰였는지 판별한다.','밑줄 단어를 쉬운 말로 바꿔 넣어 문장이 그대로 통하는지 해 봤나?']];
+const ERRS=[['E1','주체·대상 바꿔치기'],['E2','인과 역전'],['E3','범위 왜곡'],['E4','조건 누락·추가'],['E5','비례 반대'],['E6','지문에 없음'],['E7','비교 오류'],['E8','순서 오류'],['E9','개념어 오용'],['E10','〈보기〉 기준 위반'],['E11','사례-개념 오대응'],['E12','내용 반대'],['E13','어휘 의미 불일치'],['E14','문법 규칙 적용 오류']];
 const RS=[['R1','지문 구조 못 잡음'],['R2','개념·정의 놓침'],['R3','단서·조건 놓침'],['R4','선지를 쪼개지 않고 통째로 판단'],['R5','상식·외부 지식으로 판단'],['R6','〈보기〉 무시하고 내 해석'],['R7','개념어 정의 모름'],['R8','발문 오독'],['R9','시간 부족'],['R10','어휘 뜻 모름']];
 const NAME={};[...INP,...OPS,...ERRS,...RS].forEach(a=>NAME[a[0]]=a[1]);
 
@@ -206,20 +211,43 @@ async function delLog(id){
   logs=logs.filter(l=>l.id!==id);if(mode!=='db')lset(logs);
 }
 
+/* ---------- 묶음 (대 신경망) ---------- */
+const byArea=a=>INP.filter(i=>i[2]===a).map(i=>i[0]);
+const GROUPS={
+  inp:[['GI1','독서','독서 지문 전체 (S1~S9)',byArea('독서')],['GI2','문학','문학 작품 전체 (L1~L5)',byArea('문학')],['GI3','화법·작문','발표·대화·초고',byArea('화법·작문')],['GI4','언어·매체','문법·매체 자료',byArea('언어·매체')]],
+  op:[['GO1','찾기','지문에서 정보와 뜻을 정확히 찾아 맞춘다',['O1','O12']],
+      ['GO2','따라가기','원인→결과, 조건, 순서, 증감을 따라간다',['O2','O3','O6','O7']],
+      ['GO3','구분하기','누구의 말인지, 무엇과 무엇이 다른지 가른다',['O4','O8']],
+      ['GO4','대입하기','〈보기〉나 정서 판단 기준을 작품·지문에 대입한다',['O5','O9']],
+      ['GO5','판별하기','개념어·서술 방식이 맞게 쓰였는지 판정한다',['O10','O11']]],
+  err:[['GE1','없는 말','지문에 근거가 없는 그럴듯한 말',['E6']],
+       ['GE2','뒤집기','내용·인과·증감·순서를 반대로',['E12','E2','E5','E8']],
+       ['GE3','바꿔치기','주체·대상·비교 대상·사례·뜻을 다른 것으로',['E1','E7','E11','E13']],
+       ['GE4','범위·조건 조작','일부↔전체, 조건을 빼거나 더함',['E3','E4']],
+       ['GE5','기준 위반','〈보기〉·개념어·문법 규칙에 어긋남',['E10','E9','E14']]]
+};
+const GOF={},GN={};
+for(const k in GROUPS)for(const g of GROUPS[k]){GN[g[0]]=g;NAME[g[0]]=g[1];for(const c of g[3])GOF[c]=g[0]}
+let expanded=new Set();
+const vis=c=>{const g=GOF[c];return g&&!expanded.has(g)?g:c};
+const layerOf=gs=>gs.flatMap(g=>expanded.has(g[0])?g[3].map(c=>({id:c,name:NAME[c],grp:g[0]})):[{id:g[0],name:g[1],isG:true}]);
+
 /* ---------- 그래프 계산 ---------- */
-function graph(){
+function graph(useVis=true){
+  const V=useVis?vis:(c=>c);
   const ew={},nw={},tri={};
-  const add=(a,b,k=1)=>{const key=a+'>'+b;ew[key]=(ew[key]||0)+k;nw[a]=(nw[a]||0)+k;nw[b]=(nw[b]||0)+k};
+  const add=(a,b,k=1)=>{a=V(a);b=V(b);const key=a+'>'+b;ew[key]=(ew[key]||0)+k;nw[a]=(nw[a]||0)+k;nw[b]=(nw[b]||0)+k};
+  const t=(a,b,c)=>{const k=[a?V(a):'?',V(b),c?V(c):'?'].join('|');tri[k]=(tri[k]||0)+1};
   if(mapMode==='mine'){
-    for(const l of cur()){if(l.ok||!l.bug)continue;if(l.inp)add(l.inp,l.bug);if(l.err)add(l.bug,l.err);const k=[l.inp||'?',l.bug,l.err||'?'].join('|');tri[k]=(tri[k]||0)+1}
+    for(const l of cur()){if(l.ok||!l.bug)continue;if(l.inp)add(l.inp,l.bug);if(l.err)add(l.bug,l.err);t(l.inp,l.bug,l.err)}
   }else{
-    for(const g of gcur()){for(const o of (g.opts||[])){if(!o.err||o.err==='E0')continue;for(const op of (o.ops||[])){if(g.inp)add(g.inp,op);add(op,o.err);const k=[g.inp||'?',op,o.err].join('|');tri[k]=(tri[k]||0)+1}}}
+    for(const g of gcur()){for(const o of (g.opts||[])){if(!o.err||o.err==='E0')continue;for(const op of (o.ops||[])){if(g.inp)add(g.inp,op);add(op,o.err);t(g.inp,op,o.err)}}}
   }
   return{ew,nw,tri};
 }
-function rates(){
-  const used={},fail={};
-  for(const l of cur()){const s=new Set(l.ops||[]);if(l.bug)s.add(l.bug);s.forEach(o=>used[o]=(used[o]||0)+1);if(!l.ok&&l.bug)fail[l.bug]=(fail[l.bug]||0)+1}
+function rates(useVis=false){
+  const V=useVis?vis:(c=>c);const used={},fail={};
+  for(const l of cur()){const s=new Set((l.ops||[]).map(V));if(l.bug)s.add(V(l.bug));s.forEach(o=>used[o]=(used[o]||0)+1);if(!l.ok&&l.bug){const b=V(l.bug);fail[b]=(fail[b]||0)+1}}
   return{used,fail};
 }
 
@@ -228,9 +256,9 @@ const svg=$('#svg');
 function draw(){
   const W=svg.clientWidth,H=svg.clientHeight;if(!W||!H)return;
   const narrow=W<640;const {ew,nw}=graph();
-  const xs=[narrow?W*.13:W*.2,W*.5,narrow?W*.87:W*.8],pos={};
-  const lay=(arr,x)=>{const n=arr.length,t=44,b=H-(narrow?70:56);arr.forEach((a,i)=>pos[a[0]]={x,y:t+(b-t)*(n<2?.5:i/(n-1))})};
-  lay(INP,xs[0]);lay(OPS,xs[1]);lay(ERRS,xs[2]);
+  const L=[layerOf(GROUPS.inp),layerOf(GROUPS.op),layerOf(GROUPS.err)];
+  const xs=[narrow?W*.15:W*.2,W*.5,narrow?W*.85:W*.8],pos={};
+  L.forEach((arr,li)=>{const n=arr.length,t=48,b=H-(narrow?70:56);arr.forEach((a,i)=>pos[a.id]={x:xs[li],y:n<2?(t+b)/2:t+(b-t)*(i/(n-1))})});
   const maxE=Math.max(1,...Object.values(ew)),maxN=Math.max(1,...Object.values(nw));
   const cls=mapMode==='mine'?'r':'b',hot=mapMode==='mine'?'hot':'hotb';
   const near=new Set();if(selected){near.add(selected);Object.keys(ew).forEach(k=>{const[a,b]=k.split('>');if(a===selected)near.add(b);if(b===selected)near.add(a)})}
@@ -238,56 +266,68 @@ function draw(){
   [['지문 유형',0],['사고 연산',1],['선지 오류',2]].forEach(([t,i])=>h+=`<text class="layer" x="${xs[i]}" y="22" text-anchor="middle">${t}</text>`);
   for(const k in ew){const[a,b]=k.split('>');const p=pos[a],q=pos[b];if(!p||!q)continue;const mx=(p.x+q.x)/2;
     const on=!selected||a===selected||b===selected;
-    h+=`<path class="edge ${cls}" d="M${p.x},${p.y} C${mx},${p.y} ${mx},${q.y} ${q.x},${q.y}" stroke-width="${(1+ew[k]/maxE*8).toFixed(1)}" stroke-opacity="${on?.55:.07}"/>`}
-  const node=(a,side)=>{const id=a[0],p=pos[id],w=nw[id]||0,r=5+9*Math.sqrt(w/maxN),dim=selected&&!near.has(id);
-    const lab=narrow?id:(side==='m'?a[1]:id+' '+a[1]);
-    let s=`<g opacity="${dim?.3:1}"><circle class="nd ${w?hot:''} ${selected===id?'sel':''}" data-id="${id}" cx="${p.x}" cy="${p.y}" r="${r.toFixed(1)}" tabindex="0" role="button" aria-label="${esc(id+' '+a[1])}"/>`;
-    if(side==='l')s+=`<text class="lb ${w?'':'m'}" x="${p.x-r-7}" y="${p.y+4}" text-anchor="end">${esc(lab)}</text>`;
-    else if(side==='r')s+=`<text class="lb ${w?'':'m'}" x="${p.x+r+7}" y="${p.y+4}">${esc(lab)}</text>`;
-    else{const tw=lab.length*(narrow?8:13)+10;s+=`<rect class="pill" x="${p.x+r+4}" y="${p.y-10}" width="${tw}" height="20" rx="4"/><text class="lb ${w?'':'m'}" x="${p.x+r+9}" y="${p.y+4}">${esc(lab)}</text>`}
+    h+=`<path class="edge ${cls}" d="M${p.x},${p.y} C${mx},${p.y} ${mx},${q.y} ${q.x},${q.y}" stroke-width="${(1+ew[k]/maxE*9).toFixed(1)}" stroke-opacity="${on?.55:.07}"/>`}
+  const node=(a,side)=>{const id=a.id,p=pos[id],w=nw[id]||0,base=a.isG?9:5,r=base+(a.isG?13:9)*Math.sqrt(w/maxN),dim=selected&&!near.has(id);
+    const lab=a.isG?a.name:(narrow?id:(side==='m'?a.name:id+' '+a.name));
+    const fs=a.isG?'font-weight:700;font-size:14px':'';
+    let s=`<g opacity="${dim?.3:1}"><circle class="nd ${a.isG?'grp':''} ${w?hot:''} ${selected===id?'sel':''}" data-id="${id}" cx="${p.x}" cy="${p.y}" r="${r.toFixed(1)}" tabindex="0" role="button" aria-label="${esc(a.name)}"/>`;
+    if(side==='l')s+=`<text class="lb ${w?'':'m'}" style="${fs}" x="${p.x-r-7}" y="${p.y+4}" text-anchor="end">${esc(lab)}</text>`;
+    else if(side==='r')s+=`<text class="lb ${w?'':'m'}" style="${fs}" x="${p.x+r+7}" y="${p.y+4}">${esc(lab)}</text>`;
+    else{const tw=lab.length*(narrow?9:(a.isG?14.5:13))+10;s+=`<rect class="pill" x="${p.x+r+4}" y="${p.y-11}" width="${tw}" height="22" rx="4"/><text class="lb ${w?'':'m'}" style="${fs}" x="${p.x+r+9}" y="${p.y+4}">${esc(lab)}</text>`}
     return s+'</g>'};
-  INP.forEach(a=>h+=node(a,'l'));ERRS.forEach(a=>h+=node(a,'r'));OPS.forEach(a=>h+=node(a,'m'));
+  L[0].forEach(a=>h+=node(a,'l'));L[2].forEach(a=>h+=node(a,'r'));L[1].forEach(a=>h+=node(a,'m'));
   svg.innerHTML=h;
   const em=$('#empty'),none=!Object.keys(ew).length;
   em.hidden=!none;
-  if(none)em.textContent=mapMode==='mine'?'아직 틀린 기록이 없습니다. "문제 기록"에서 틀린 문제를 넣으면 끊긴 경로가 빨간 선으로 나타납니다.':'기출 태깅 데이터가 아직 없습니다. 기출 PDF를 분석하면 출제자가 자주 쓰는 경로가 파란 선으로 채워집니다.';
+  if(none)em.textContent=mapMode==='mine'?'아직 틀린 기록이 없습니다. "문제 기록"에서 틀린 문제를 넣으면 끊긴 경로가 빨간 선으로 나타납니다.':'선택한 출처의 기출 태깅 데이터가 없습니다.';
 }
 const ro=new ResizeObserver(draw);ro.observe(svg);
 svg.addEventListener('click',e=>{const id=e.target.dataset&&e.target.dataset.id;if(!id)return;selected=selected===id?null:id;renderMap()});
 svg.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.dataset.id){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
 
 function renderPanels(){
-  const {tri}=graph();
-  const {used,fail}=rates();
-  const g=graph();
-  let rows=OPS.map(o=>({id:o[0],w:mapMode==='mine'?(fail[o[0]]||0):(g.nw[o[0]]||0),u:used[o[0]]||0})).filter(x=>x.w>0).sort((a,b)=>b.w-a.w).slice(0,6);
+  const g=graph();const {used,fail}=rates(true);
+  const mids=layerOf(GROUPS.op);const inW={};for(const k in g.ew){const t=k.split('>')[1];inW[t]=(inW[t]||0)+g.ew[k]}
+  let rows=mids.map(m=>({id:m.id,w:mapMode==='mine'?(fail[m.id]||0):(inW[m.id]||0),u:used[m.id]||0})).filter(x=>x.w>0).sort((a,b)=>b.w-a.w).slice(0,6);
   const mx=Math.max(1,...rows.map(r=>r.w));
-  $('#hub').innerHTML=rows.length?rows.map(r=>{const right=mapMode==='mine'?`${r.w}/${r.u}`:r.w;return`<div class="row"><span>${esc(NAME[r.id])}</span><div class="track"><div class="fill" style="width:${(r.w/mx*100).toFixed(0)}%;${mapMode==='mine'?'':'background:var(--blue)'}"></div></div><span class="num">${right}</span></div>`}).join('')+`<p class="muted">${mapMode==='mine'?'틀린 횟수 / 그 연산을 쓴 문제 수. 맨 위가 이번 주 집중 수리 대상.':'기출에서 오답 선지를 만든 데 쓰인 횟수.'}</p>`:'<p class="muted">데이터가 쌓이면 가장 많이 끊기는 연산이 여기 순위로 나옵니다.</p>';
-  const tr=Object.entries(tri).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  $('#hub').innerHTML=rows.length?rows.map(r=>{const right=mapMode==='mine'?`${r.w}/${r.u}`:r.w;return`<div class="row"><span>${esc(NAME[r.id])}</span><div class="track"><div class="fill" style="width:${(r.w/mx*100).toFixed(0)}%;${mapMode==='mine'?'':'background:var(--blue)'}"></div></div><span class="num">${right}</span></div>`}).join('')+`<p class="muted">${mapMode==='mine'?'틀린 횟수 / 그 연산을 쓴 문제 수. 맨 위가 이번 주 집중 수리 대상.':'기출에서 오답 선지를 판별하는 데 필요했던 횟수.'}</p>`:'<p class="muted">데이터가 쌓이면 가장 많이 끊기는 연산이 여기 순위로 나옵니다.</p>';
+  const tr=Object.entries(g.tri).sort((a,b)=>b[1]-a[1]).slice(0,6);
   $('#risk').innerHTML=tr.length?tr.map(([k,c])=>{const[a,b,e]=k.split('|');return`<div class="path"><span>${esc(NAME[a]||a)} → <b>${esc(NAME[b]||b)}</b> → ${esc(NAME[e]||e)}</span><span class="num">${c}회</span></div>`}).join('')+'<p class="muted">이런 지문에서 이 연산이 끊기면 이 함정에 걸린다는 뜻입니다.</p>':'<p class="muted">"지문 유형 → 연산 → 오류" 조합 중 반복되는 것이 여기 나옵니다.</p>';
   renderSel();
 }
 function renderSel(){
   const t=$('#selT'),b=$('#sel');
-  if(!selected){t.textContent='노드를 눌러 보세요';b.innerHTML='지도에서 원을 누르면 그 연산의 설명, 체크 질문, 관련 기록이 여기 나옵니다.';return}
+  if(!selected){t.textContent='노드를 눌러 보세요';b.innerHTML='큰 원(묶음)을 누르면 어떤 항목들이 묶여 있는지, 작은 원을 누르면 그 항목의 설명과 관련 기록이 나옵니다.';return}
+  const G=GN[selected];
+  if(G){
+    const raw=graph(false).nw;const mem=G[3].map(c=>({c,w:raw[c]||0})).sort((x,y)=>y.w-x.w);const mx=Math.max(1,...mem.map(m=>m.w));
+    t.textContent=`묶음: ${G[1]}`;
+    b.innerHTML=`<p style="margin:0 0 10px">${esc(G[2])}</p>`+mem.map(m=>`<div class="row"><span>${esc(m.c+' '+NAME[m.c])}</span><div class="track"><div class="fill" style="width:${(m.w/mx*100).toFixed(0)}%;${mapMode==='mine'?'':'background:var(--blue)'}"></div></div><span class="num">${m.w}</span></div>`).join('')+`<p><button class="chip" data-exp="${esc(G[0])}">이 묶음 펼쳐 보기</button></p>`;
+    return;
+  }
   t.textContent=`${selected} ${NAME[selected]||''}`;
-  const op=OPS.find(o=>o[0]===selected);
+  const op=OPS.find(o=>o[0]===selected);const gid=GOF[selected];
   const rel=cur().filter(l=>!l.ok&&(l.bug===selected||l.err===selected||l.inp===selected)).slice(0,5);
-  b.innerHTML=(op?`<p style="margin:0 0 8px">${esc(op[2])}</p><p class="op"><span class="q" style="display:block;background:var(--redbg);border-radius:8px;padding:8px 10px">${esc(op[3])}</span></p>`:'')+
-    (rel.length?'<p style="margin:10px 0 4px"><b>관련 오답</b></p>'+rel.map(l=>`<div class="path"><span>${esc(l.src||'출처 없음')}<br><span class="muted">${esc(l.memo||'')}</span></span><span class="num">${esc(l.d||'')}</span></div>`).join(''):'<p class="muted">이 노드와 연결된 오답 기록이 없습니다.</p>');
+  b.innerHTML=(gid?`<p class="muted" style="margin:0 0 8px">묶음: <b>${esc(NAME[gid])}</b> <button class="chip" data-col="${esc(gid)}">접기</button></p>`:'')+
+    (op?`<p style="margin:0 0 8px">${esc(op[2])}</p><p style="background:var(--redbg);border-radius:8px;padding:8px 10px;font-size:14px">${esc(op[3])}</p>`:'')+
+    (rel.length?'<p style="margin:10px 0 4px"><b>관련 오답</b></p>'+rel.map(l=>`<div class="path"><span>${esc(l.src||'출처 없음')}<br><span class="muted">${esc(l.memo||'')}</span></span><span class="num">${esc(l.d||'')}</span></div>`).join(''):'<p class="muted">이 노드와 연결된 내 오답 기록이 없습니다.</p>');
 }
+$('#sel').addEventListener('click',e=>{const x=e.target.closest('[data-exp],[data-col]');if(!x)return;
+  if(x.dataset.exp){expanded.add(x.dataset.exp);selected=null}else{expanded.delete(x.dataset.col);selected=x.dataset.col}
+  renderAll()});
 function renderMap(){draw();renderPanels()}
 
 /* ---------- 기록 폼 ---------- */
 const F={kind:'기타',area:'독서',inp:null,ok:null,ops:new Set(),bug:null,err:null};
 const chips=(el,arr,isOn,onClick,blue)=>{el.innerHTML=arr.map(a=>`<button type="button" class="chip ${blue?'blue':''} ${isOn(a[0])?'on':''}" data-k="${esc(a[0])}">${esc(a[1])}</button>`).join('');el.onclick=e=>{const k=e.target.dataset.k;if(k){onClick(k);renderForm()}}};
+const chipsG=(el,groups,isOn,onClick,blue)=>{el.innerHTML=groups.map(g=>`<div class="cg"><span class="cgl">${esc(g[1])}</span>${g[3].map(c=>`<button type="button" class="chip ${blue?'blue':''} ${isOn(c)?'on':''}" data-k="${esc(c)}">${esc(NAME[c])}</button>`).join('')}</div>`).join('');el.onclick=e=>{const k=e.target.dataset.k;if(k){onClick(k);renderForm()}}};
 function renderForm(){
   chips($('#cKind'),KINDS,k=>F.kind===k,k=>F.kind=k);
   chips($('#cArea'),AREAS.map(a=>[a,a]),k=>F.area===k,k=>{F.area=k;F.inp=null});
   chips($('#cInp'),INP.filter(i=>i[2]===F.area),k=>F.inp===k,k=>F.inp=F.inp===k?null:k);
-  chips($('#cOps'),OPS,k=>F.ops.has(k),k=>F.ops.has(k)?F.ops.delete(k):F.ops.add(k),true);
-  chips($('#cBug'),OPS,k=>F.bug===k,k=>F.bug=F.bug===k?null:k);
-  chips($('#cErr'),ERRS,k=>F.err===k,k=>F.err=F.err===k?null:k);
+  chipsG($('#cOps'),GROUPS.op,k=>F.ops.has(k),k=>F.ops.has(k)?F.ops.delete(k):F.ops.add(k),true);
+  chipsG($('#cBug'),GROUPS.op,k=>F.bug===k,k=>F.bug=F.bug===k?null:k);
+  chipsG($('#cErr'),GROUPS.err,k=>F.err===k,k=>F.err=F.err===k?null:k);
   $('#rOk').classList.toggle('on',F.ok===true);$('#rNg').classList.toggle('on',F.ok===false);
   $('#failBox').hidden=F.ok!==false;
 }
@@ -310,7 +350,8 @@ $('#form').addEventListener('submit',async e=>{
 /* ---------- 연산 카드 / 목록 ---------- */
 function renderOps(){
   const {used,fail}=rates();
-  $('#opsGrid').innerHTML=OPS.map(o=>`<div class="card op"><div class="code">${o[0]}</div><h3>${esc(o[1])}</h3><p>${esc(o[2])}</p><p class="q">${esc(o[3])}</p><p class="muted">내 기록: ${fail[o[0]]||0}번 끊김 / ${used[o[0]]||0}문제 사용</p></div>`).join('');
+  const card=o=>`<div class="card op"><div class="code">${o[0]}</div><h3>${esc(o[1])}</h3><p>${esc(o[2])}</p><p class="q">${esc(o[3])}</p><p class="muted">내 기록: ${fail[o[0]]||0}번 끊김 / ${used[o[0]]||0}문제 사용</p></div>`;
+  $('#opsGrid').innerHTML=GROUPS.op.map(g=>`<h3 style="grid-column:1/-1;margin-top:10px">${esc(g[1])} <span class="muted" style="font-family:'Noto Sans KR',sans-serif;font-weight:400">— ${esc(g[2])}</span></h3>`+g[3].map(c=>card(OPS.find(o=>o[0]===c))).join('')).join('');
 }
 function renderList(){
   const L=cur(),ng=L.filter(l=>!l.ok).length;
@@ -326,7 +367,7 @@ $('#tbody').addEventListener('click',async e=>{const b=e.target.closest('[data-d
 function makeDemo(){
   const pick=(a,i)=>a[i%a.length];const out=[];
   const plan=[['S3','O8','E1'],['S3','O8','E1'],['S1','O3','E4'],['S1','O3','E4'],['S2','O6','E8'],['S5','O2','E2'],['S1','O5','E10'],['L1','O9','E10'],['L3','O8','E1'],['S7','O5','E10'],['G1','O10','E9'],['S1','O3','E3'],['L2','O10','E9'],['S4','O2','E2']];
-  for(let i=0;i<40;i++){const fail=i<plan.length;const p=pick(plan,i);const area=p[0][0]==='S'?'독서':p[0][0]==='L'?'문학':'언어';const kind=pick(['수능','모평','기타','학평'],i);
+  for(let i=0;i<40;i++){const fail=i<plan.length;const p=pick(plan,i);const area=p[0][0]==='S'?'독서':p[0][0]==='L'?'문학':'언어·매체';const kind=pick(['수능','모평','기타','학평'],i);
     out.push({id:'d'+i,t:i,d:'예시',src:`예시 문항 ${i+1}`,kind,area,inp:p[0],ok:!fail,ops:[p[1],pick(['O1','O4','O2'],i)],bug:fail?p[1]:null,err:fail?p[2]:null,memo:fail?'예시 교훈':''})}
   return out;
 }
@@ -336,6 +377,8 @@ $('#exp').onclick=()=>{const b=new Blob([JSON.stringify(logs,null,1)],{type:'app
 $('#imp').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const arr=JSON.parse(await f.text());if(!Array.isArray(arr))throw 0;const have=new Set(logs.map(l=>l.id));let n=0;for(const x of arr){if(x&&x.id&&!have.has(x.id)){logs.push(x);n++}}logs.sort((a,b)=>(b.t||0)-(a.t||0));lset(logs);toast(n+'건을 합쳤습니다');renderAll()}catch(err){toast('백업 파일을 읽지 못했습니다')}e.target.value=''};
 
 /* ---------- 공통 ---------- */
+$('#vBig').onclick=()=>{expanded.clear();selected=null;renderAll()};
+$('#vSmall').onclick=()=>{for(const k in GROUPS)GROUPS[k].forEach(g=>expanded.add(g[0]));selected=null;renderAll()};
 $('#mMine').onclick=()=>{mapMode='mine';selected=null;renderAll()};
 $('#mGichul').onclick=()=>{mapMode='gichul';selected=null;renderAll()};
 $('#kf').onchange=e=>{kf=e.target.value;selected=null;renderAll()};
@@ -347,6 +390,7 @@ function setStatus(){
 }
 function renderAll(){
   $('#demoNote').hidden=!demo;
+  const allG=Object.values(GROUPS).flat();$('#vBig').classList.toggle('on',expanded.size===0);$('#vSmall').classList.toggle('on',expanded.size===allG.length);
   $('#mMine').classList.toggle('on',mapMode==='mine');$('#mGichul').classList.toggle('on',mapMode==='gichul');
   setStatus();renderMap();renderOps();renderList();
 }
