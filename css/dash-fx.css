@@ -1,0 +1,65 @@
+/* ===== 스마트팜 '현재 환경' — 밝은 관제 스타일 (dash-fx) ===== */
+.env-fx{--fx-ink:var(--ink);--fx-mute:var(--ink-2);--fx-line:rgba(31,58,43,.10);--fx-main:#2E7D5B;--fx-mint:#3FB68B;--fx-lime:#9BBF3A;--fx-amber:#C98A1B;--fx-red:#C2412D;
+  position:relative;
+  background:
+    linear-gradient(rgba(31,58,43,.035) 1px,transparent 1px) 0 0/100% 28px,
+    linear-gradient(90deg,rgba(31,58,43,.035) 1px,transparent 1px) 0 0/28px 100%,
+    radial-gradient(700px 300px at 90% 0%,rgba(63,182,139,.08),transparent 65%)}
+.env-fx .dh p{display:inline-flex;align-items:center;gap:10px}
+.env-fx .fx-live{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--fx-main);background:#fff;border:1px solid rgba(46,125,91,.3);border-radius:999px;padding:3px 10px 3px 8px}
+.env-fx .fx-live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--fx-mint);animation:fxping 1.8s ease-out infinite}
+
+/* 카드 */
+.env-fx .panel.metric{position:relative;overflow:hidden;gap:8px;transition:box-shadow .35s,transform .35s var(--ease),border-color .3s}
+.env-fx .panel.metric::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--forest),var(--fx-mint),var(--fx-lime));opacity:.85}
+.env-fx .panel.metric:hover{transform:translateY(-3px);border-color:rgba(46,125,91,.28);box-shadow:0 28px 60px -30px rgba(31,58,43,.45)}
+.env-fx .sig{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;background:#F3F6EE;border:1px solid var(--fx-line)}
+.env-fx .sig::before{content:"";width:6px;height:6px;border-radius:50%;background:#C9CFC4;transition:background .15s,box-shadow .15s}
+.env-fx .metric.rx .sig::before{background:var(--fx-mint);box-shadow:0 0 0 3px rgba(63,182,139,.25)}
+.env-fx .m-val b{transition:color .5s}
+.env-fx .metric.flash .m-val b{color:var(--fx-main)}
+
+/* 정상 램프: 옅은 파란 불 */
+.env-fx .st.s0{color:#1F5C99;background:rgba(56,132,230,.09)}
+.env-fx .st.s0::before{width:8px;height:8px;background:#4A9BF0;box-shadow:0 0 0 2px rgba(74,155,240,.18),0 0 8px rgba(74,155,240,.55)}
+@media (prefers-reduced-motion:no-preference){.env-fx .st.s0::before{animation:fxlamp 2.6s ease-in-out infinite}}
+@keyframes fxlamp{0%,100%{box-shadow:0 0 0 2px rgba(74,155,240,.18),0 0 6px rgba(74,155,240,.45)}50%{box-shadow:0 0 0 3px rgba(74,155,240,.22),0 0 12px rgba(74,155,240,.75)}}
+/* 상태 깜빡임 (주의·경고만) */
+.env-fx .st.s1::before,.env-fx .st.s2::before{animation:fxblink 1s steps(2,start) infinite}
+
+/* 적정 범위 바 */
+.fx-rng{position:relative;height:20px;margin-top:2px}
+.fx-rng .tr{position:absolute;left:0;right:0;top:8px;height:4px;border-radius:4px;background:#ECEEE7}
+.fx-rng .ok{position:absolute;top:8px;height:4px;border-radius:4px;background:linear-gradient(90deg,rgba(63,182,139,.45),rgba(155,191,58,.55))}
+.fx-rng .pt{position:absolute;top:4px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#fff;border:3px solid var(--fx-main);box-shadow:0 2px 6px rgba(31,58,43,.25);transition:left .8s var(--ease),border-color .3s}
+.fx-rng .pt.s1{border-color:var(--fx-amber)}
+.fx-rng .pt.s2{border-color:var(--fx-red)}
+
+/* 스파크라인 */
+.fx-spark{position:relative;margin-top:2px;padding-right:6px}
+.env-fx .spark{display:block;height:52px;margin:0}
+.env-fx .spark path.l{stroke:var(--fx-main);stroke-width:2}
+.env-fx .spark path.a{stroke:none}
+.fx-dot{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--fx-main);border:2px solid #fff;box-shadow:0 1px 4px rgba(31,58,43,.3);transition:top .6s var(--ease)}
+.fx-dot::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--fx-mint);animation:fxring 2s ease-out infinite}
+
+@keyframes fxping{0%{box-shadow:0 0 0 0 rgba(63,182,139,.55)}100%{box-shadow:0 0 0 8px rgba(63,182,139,0)}}
+@keyframes fxring{0%{transform:scale(.6);opacity:1}100%{transform:scale(2);opacity:0}}
+@keyframes fxblink{to{visibility:hidden}}
+@keyframes fxdraw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+@keyframes fxup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:no-preference){
+  .env-fx.fx-pre .panel.metric{opacity:0}
+  .env-fx.fx-in .panel.metric{animation:fxup .7s var(--ease) both}
+  .env-fx.fx-in .panel.metric:nth-child(2){animation-delay:.08s}
+  .env-fx.fx-in .panel.metric:nth-child(3){animation-delay:.16s}
+  .env-fx.fx-in .panel.metric:nth-child(4){animation-delay:.24s}
+  .env-fx.fx-in .panel.metric:nth-child(5){animation-delay:.32s}
+  .env-fx.fx-in .panel.metric:nth-child(6){animation-delay:.4s}
+  .env-fx.fx-in .spark path.l{stroke-dasharray:var(--len);animation:fxdraw 1.6s var(--ease) .3s both}
+}
+@media (prefers-reduced-motion:reduce){
+  .env-fx .fx-live::before,.fx-dot::after,.env-fx .st::before{animation:none}
+  .fx-rng .pt,.fx-dot{transition:none}
+}
