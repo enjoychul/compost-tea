@@ -59,6 +59,14 @@ h2{font-size:18px;margin:22px 0 10px}
 .top .t{flex:1;font-weight:700;font-size:15px;line-height:1.25}
 .top .t small{display:block;font-weight:400;color:var(--mute);font-size:13px}
 .timer{font-variant-numeric:tabular-nums;color:var(--mute);font-size:15px}
+.clock{padding:6px 12px 8px;background:var(--card);border-bottom:1px solid var(--line)}
+.cl-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.cl-lab{font-size:14px;color:var(--mute)}
+.cl-num{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1}
+.cl-bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
+.cl-bar i{display:block;height:100%;width:100%;background:var(--blue);transition:width 1s linear}
+.clock.warn .cl-num{color:#c77a00}.clock.warn .cl-bar i{background:#e0a020}
+.clock.over .cl-num,.clock.over .cl-lab{color:var(--red)}.clock.over .cl-bar i{background:var(--red)}
 .tools{display:flex;gap:6px;padding:6px 10px;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--card)}
 .tools button{min-height:36px;padding:4px 12px;border-radius:999px;font-size:14px;flex:none}
 .tools button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -128,9 +136,9 @@ h2{font-size:18px;margin:22px 0 10px}
 
   <h2>지금 몇 분 있어?</h2>
   <div class="go">
-    <button data-mode="short"><span class="ic">⚡</span><div><b>2분</b><span>문법·어휘 한 문제</span></div></button>
-    <button data-mode="mid"><span class="ic">🎯</span><div><b>5분</b><span>문학·화작·언매 한 세트 (2~4문항)</span></div></button>
-    <button data-mode="long"><span class="ic">📘</span><div><b>10분</b><span>독서 한 지문 (3~6문항)</span></div></button>
+    <button data-mode="m5"><span class="ic">🎯</span><div><b>5분</b><span>짧은 세트 2~3문항 · 화작·문법·매체·짧은 지문</span></div></button>
+    <button data-mode="m10"><span class="ic">📘</span><div><b>10분</b><span>4문항 세트 · 독서·문학 주력</span></div></button>
+    <button data-mode="m20"><span class="ic">🗓</span><div><b>20분</b><span>긴 지문 5~6문항 · 학원 없는 날·주말</span></div></button>
   </div>
 
   <h2>최근</h2>
@@ -155,6 +163,7 @@ h2{font-size:18px;margin:22px 0 10px}
     <div class="t" id="stTitle"></div>
     <div class="timer" id="timer">0:00</div>
   </div>
+  <div class="clock" id="clock"><div class="cl-row"><span class="cl-lab" id="clLab">남은 시간</span><span class="cl-num" id="clNum">5:00</span></div><div class="cl-bar"><i id="clBar"></i></div></div>
   <div class="tools" id="tools"></div>
   <div id="viewer"><div id="vmsg">문제지 여는 중…</div></div>
   <div class="sheet" id="sheet"></div>
@@ -197,12 +206,10 @@ async function loadData(){
   SETS=Object.entries(m).map(([pid,items])=>{
     items.sort((a,b)=>a.q-b.q);const f=items[0],c=f.inp[0];
     const pg=[...new Set(items.flatMap(i=>i.pg))].sort((a,b)=>a-b);
-    const mode=(c==='S'||items.length>=5)?'long':'mid';
+    const mode=items.length<=3?'m5':items.length===4?'m10':'m20';
     return {pid,items,year:f.year,sub:f.sub,c,inp:f.inp,pg,mode,label:`${f.year} ${SUBL[f.sub]||''}${items[0].q}~${items.at(-1).q}번`,kindTxt:`${AREA(f.inp)} · ${INP[f.inp]||f.inp} · ${items.length}문항`}});
   BYPID=Object.fromEntries(SETS.map(s=>[s.pid,s]));
 }
-// ⚡ 2분: 문법 문항 또는 어휘(문맥) 문항 하나
-function shortPool(){return G.filter(it=>it.inp==='G1'||it.qt==='Q7')}
 
 /* ---------- 암호 해제 ---------- */
 let PW=null;
@@ -264,10 +271,6 @@ function pickFrom(list,weight){
 function choose(mode){
   const done=store.get(DK,{});
   const yw=x=>1+(x.year-2017)/4;   // 최근 회차를 조금 더 자주
-  if(mode==='short'){
-    const pool=shortPool();const fresh=pool.filter(it=>!done['q:'+it.id]);
-    const it=pickFrom(fresh.length?fresh:pool,yw);const s=BYPID[it.pid];
-    return {...s,items:[it],pg:it.pg,label:`${it.year} ${SUBL[it.sub]||''}${it.q}번`,kindTxt:`${AREA(it.inp)} · ${it.qt==='Q7'?'어휘':'문법'} · 1문항`,single:true}}
   const pool=SETS.filter(s=>s.mode===mode);const fresh=pool.filter(s=>!done[s.pid]);
   if(fresh.length)return pickFrom(fresh,yw);
   return pool.sort((a,b)=>(done[a.pid]||0)-(done[b.pid]||0))[0];
@@ -288,12 +291,22 @@ let S=null,timerId=null,renderTask=null;
 function setMsg(m){const v=$('#vmsg');if(v){v.textContent=m;v.classList.remove('hide')}}
 async function start(set){
   if(!set){toast('고를 세트가 없습니다');return}
-  S={set,pick:{},conf:{},guess:{},t0:Date.now(),page:set.pg[0],view:innerWidth<700?'L':'F',done:false};
+  const lim=({m5:5,m10:10,m20:20})[set.mode]||10;
+  S={set,pick:{},conf:{},guess:{},t0:Date.now(),lim:lim*60,page:set.pg[0],view:innerWidth<700?'L':'F',done:false};
   $('#stTitle').innerHTML=`${esc(set.label)}<small>${esc(set.kindTxt)} · ${set.pg.length>1?set.pg[0]+'~'+set.pg.at(-1):set.pg[0]}쪽</small>`;
   show('solve');renderTools();renderSheet();
-  clearInterval(timerId);timerId=setInterval(()=>{const s=Math.floor((Date.now()-S.t0)/1000);$('#timer').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},1000);
+  $('#timer').textContent=lim+'분 목표';$('#clock').classList.remove('hide');
+  clearInterval(timerId);tick();timerId=setInterval(tick,1000);
   $('#viewer').innerHTML='<div id="vmsg">문제지 여는 중…</div>';
   try{await openYear(set.year);await renderPage()}catch(e){setMsg('문제지를 열지 못했습니다. '+(e.message||''))}
+}
+const mmss=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+function tick(){
+  if(!S)return;const el=Math.floor((Date.now()-S.t0)/1000),left=S.lim-el,c=$('#clock');
+  c.classList.toggle('warn',left>0&&left<=60);c.classList.toggle('over',left<=0);
+  $('#clLab').textContent=left>0?'남은 시간':'시간 초과';
+  $('#clNum').textContent=left>0?mmss(left):'+'+mmss(-left);
+  $('#clBar').style.width=(left<=0?100:left*100/S.lim)+'%';
 }
 function renderTools(){
   const s=S.set;
@@ -343,7 +356,8 @@ function trapOf(it,pick){
   return {err:optErr(it.ans),who:'ans'};                      // 적절하지 않은 것: 못 찾은 정답 선지의 함정
 }
 function grade(){
-  S.sec=Math.round((Date.now()-S.t0)/1000);clearInterval(timerId);S.done=true;
+  S.sec=Math.round((Date.now()-S.t0)/1000);clearInterval(timerId);tick();S.done=true;
+  $('#clLab').textContent=S.sec<=S.lim?`${mmss(S.sec)} 걸림 · 목표 안`:`${mmss(S.sec)} 걸림 · ${mmss(S.sec-S.lim)} 초과`;
   const s=S.set;
   const rows=s.items.filter(it=>S.pick[it.id]).map(it=>{
     const pick=S.pick[it.id],ok=pick===it.ans;
@@ -377,7 +391,7 @@ function save(){
     L.unshift({id:'z'+now.toString(36)+i+Math.random().toString(36).slice(2,5),t:now-i,d,
       src:`${it.year} 수능 ${SUBL[it.sub]||''}${it.q}번`,kind:'수능',area:AREA(it.inp),inp:it.inp,ok,
       ops:oo.ops&&oo.ops.length?oo.ops:[],bug:ok?null:(oo.ops||[])[0]||null,err:ok?null:t.err,r:null,
-      memo:'',via:'짜투리',qid:it.id,pick,ans:it.ans,pol:it.pol,conf:ok?(S.guess[it.id]?'guess':null):(S.conf[it.id]||null),sec:per});
+      memo:'',via:'짜투리',qid:it.id,pick,ans:it.ans,pol:it.pol,conf:ok?(S.guess[it.id]?'guess':null):(S.conf[it.id]||null),sec:per,setSec:S.sec,lim:S.lim});
   });
   store.set(LK,L);
   const done=store.get(DK,{});if(s.single)done['q:'+s.items[0].id]=now;else done[s.pid]=now;store.set(DK,done);
