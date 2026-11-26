@@ -21,6 +21,9 @@
 .hx-kicker svg{width:20px;height:20px;color:var(--leaf);flex:none}
 .hx-kicker b{color:var(--leaf);font-weight:700}
 .hx-kicker-brand{font-size:14px;font-weight:700;color:var(--leaf);border:1px solid rgba(30,154,76,.35);border-radius:999px;padding:3px 12px;letter-spacing:.02em}
+.hx-kicker-brand{text-decoration:none;transition:background .2s,color .2s,border-color .2s}
+.hx-kicker-brand:hover{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.hx-kicker-brand:focus-visible{outline:2px solid var(--leaf);outline-offset:2px}
 .hx-panels{display:grid}
 .hx-panel{grid-area:1/1;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .35s ease,transform .35s ease,visibility 0s linear .35s}
 .hx-panel.is-on{opacity:1;visibility:visible;transform:none;transition:opacity .5s ease .25s,transform .5s var(--ease) .25s,visibility 0s linear 0s}
