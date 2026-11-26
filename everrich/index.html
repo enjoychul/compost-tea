@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>국어 연산 디버거</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 채점하는 책상 — 차분하고 정확하게, 맞고 틀림보다 '어디서 끊겼나'
+   IDEA: 빨간펜으로 채점한 시험지 위에 그린 회로도
+   PICTURE: 3층 연산 신경망 — 지문유형 → 사고연산 → 선지오류, 틀린 경로가 굵은 빨간 선
+   COLOUR and TYPE: 종이 흰색 · 먹색 · 채점 빨강 · 파랑 잉크 / 나눔명조 제목 + Noto Sans KR
+   LAYOUT: 상단 탭, 지도 크게, 아래 허브·위험경로·선택 노드 패널 */
+:root{color-scheme:light dark;--bg:light-dark(#fbfaf7,#121417);--card:light-dark(#fff,#1a1d22);--ink:light-dark(#1a1c21,#ebe9e3);--mute:light-dark(#686b73,#9c9ea5);--line:light-dark(#e4e1d9,#2b2e35);--red:light-dark(#cf322d,#ff6d60);--redbg:light-dark(#fdecea,#3a1d1c);--blue:light-dark(#2449a6,#86a4ff);--bluebg:light-dark(#e9eefb,#1b2440)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Nanum Myeongjo",serif;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,4.2vw,44px)}h2{font-size:24px}h3{font-size:18px}
+.band{padding:clamp(20px,3.5vw,48px) max(5vw,16px);max-width:1240px;margin:0 auto}
+header.band{padding-bottom:8px}
+.sub{color:var(--mute);margin:8px 0 0}
+nav{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px;border-bottom:1px solid var(--line)}
+nav a{padding:10px 14px;text-decoration:none;color:var(--mute);font-weight:500;border-bottom:3px solid transparent;margin-bottom:-1px;min-height:44px}
+nav a.on{color:var(--ink);border-color:var(--red)}
+.status{font-size:13px;color:var(--mute);margin-top:10px}
+.status b{color:var(--ink)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px}
+button,select,input,textarea{font:inherit;font-size:16px;color:var(--ink)}
+button{min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button.pri{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
+select,input,textarea{min-height:44px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);width:100%}
+.fig{position:relative;min-height:560px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.empty{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:var(--card);border:1px dashed var(--line);border-radius:8px;padding:8px 14px;font-size:14px;color:var(--mute);text-align:center;width:min(92%,460px)}
+.edge{fill:none}.edge.r{stroke:var(--red)}.edge.b{stroke:var(--blue)}
+.nd{stroke:var(--ink);stroke-width:1.5;fill:var(--card);cursor:pointer}.nd.hot{fill:var(--red);stroke:var(--red)}.nd.hotb{fill:var(--blue);stroke:var(--blue)}.nd.sel{stroke-width:4}
+.lb{font-size:13px;fill:var(--ink);pointer-events:none}.lb.m{fill:var(--mute)}.pill{fill:var(--card);opacity:.92}
+.layer{font-size:12px;fill:var(--mute);font-weight:700}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h3{margin-bottom:12px}
+.row{display:grid;grid-template-columns:7.5em minmax(0,1fr) 3.5em;gap:8px;align-items:center;font-size:14px;margin:7px 0}
+.track{height:12px;background:var(--line);border-radius:6px;overflow:hidden}.fill{height:100%;background:var(--red)}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.path{font-size:14px;padding:8px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+.path:first-of-type{border-top:0}
+.muted{color:var(--mute);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:40px;padding:0 12px;font-size:14px;border-radius:20px}
+.chip.on{background:var(--red);color:#fff;border-color:var(--red)}
+.chip.blue.on{background:var(--blue);border-color:var(--blue)}
+.form{display:grid;gap:18px;max-width:760px}
+.form label{display:block;font-weight:700;margin-bottom:8px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hint{font-weight:400;color:var(--mute);font-size:13px;margin-left:6px}
+.ok{color:var(--blue);font-weight:700}.ng{color:var(--red);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card)}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mute);font-weight:500}
+.ops{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.op .code{font-size:13px;color:var(--red);font-weight:700}
+.op p{margin:6px 0;font-size:15px}.op .q{background:var(--redbg);border-radius:8px;padding:8px 10px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.demo{background:var(--bluebg);color:var(--blue);border-radius:8px;padding:8px 12px;font-size:14px;margin-bottom:10px}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
+@media(max-width:860px){.grid3{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.two{grid-template-columns:minmax(0,1fr)}.fig{min-height:520px}table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:5.5em;margin-inline-start:-6em;color:var(--mute)}.stack td:empty{display:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band">
+  <h1>어느 연산에서 끊겼나</h1>
+  <p class="sub">맞았는지 틀렸는지보다, 머릿속 어느 연산에서 틀렸는지를 기록하고 지도로 봅니다.</p>
+  <nav id="nav">
+    <a href="#map">신경망 지도</a><a href="#log">문제 기록</a><a href="#ops">연산 카드</a><a href="#list">기록 목록</a>
+  </nav>
+  <div class="status" id="status">불러오는 중…</div>
+</header>
+
+<main>
+<section class="band" id="v-map">
+  <div id="demoNote" class="demo" hidden>예시 데이터를 보여주는 중입니다 (저장되지 않음). <button id="demoOff" class="chip">예시 끄기</button></div>
+  <div class="bar">
+    <button id="mMine" class="on">내 오답 경로</button>
+    <button id="mGichul">기출 출제 빈도</button>
+    <select id="who" hidden aria-label="누구의 기록"></select>
+    <button id="demoOn">예시로 보기</button>
+    <button id="exp">백업 내보내기</button>
+    <label class="chip" style="display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:20px;cursor:pointer;min-height:44px;padding:0 14px;background:var(--card)">백업 불러오기<input type="file" id="imp" accept=".json,application/json" hidden></label>
+  </div>
+  <div class="fig" id="fig"><svg id="svg" role="img" aria-label="지문유형, 사고연산, 선지오류 3층 연결 지도"></svg><div class="empty" id="empty" hidden></div></div>
+  <div class="grid3">
+    <div class="card"><h3>허브 연산</h3><div id="hub"></div></div>
+    <div class="card"><h3>위험 경로</h3><div id="risk"></div></div>
+    <div class="card"><h3 id="selT">노드를 눌러 보세요</h3><div id="sel" class="muted">지도에서 원을 누르면 그 연산의 설명, 체크 질문, 관련 기록이 여기 나옵니다.</div></div>
+  </div>
+</section>
+
+<section class="band" id="v-log" hidden>
+  <h2>문제 하나 기록하기</h2>
+  <p class="sub">맞은 문제도 기록하면 연산별 '오답률'이 정확해집니다. 틀렸다면 끊긴 연산 하나를 꼭 고르세요.</p>
+  <form class="form" id="form" style="margin-top:18px">
+    <div class="two">
+      <div><label for="fDate">날짜</label><input type="date" id="fDate"></div>
+      <div><label for="fSrc">출처 <span class="hint">예: 2025 수능 17번</span></label><input id="fSrc" maxlength="60"></div>
+    </div>
+    <div><label>영역</label><div class="chips" id="cArea"></div></div>
+    <div><label>지문 유형</label><div class="chips" id="cInp"></div></div>
+    <div><label>결과</label><div class="chips"><button type="button" class="chip blue" id="rOk">맞음</button><button type="button" class="chip" id="rNg">틀림</button></div></div>
+    <div><label>이 문제에서 쓴 연산 <span class="hint">여러 개 선택</span></label><div class="chips" id="cOps"></div></div>
+    <div id="failBox" hidden>
+      <div><label>끊긴 연산 <span class="hint">하나만 — 가장 결정적인 것</span></label><div class="chips" id="cBug"></div></div>
+      <div style="margin-top:18px"><label>속은 선지 오류 유형</label><div class="chips" id="cErr"></div></div>
+      <div style="margin-top:18px"><label for="fR">버그 원인</label><select id="fR"></select></div>
+    </div>
+    <div><label for="fMemo">한 줄 교훈</label><input id="fMemo" maxlength="120" placeholder="다음엔 어떻게 막을까"></div>
+    <div><button class="pri" type="submit">기록 저장</button></div>
+  </form>
+</section>
+
+<section class="band" id="v-ops" hidden>
+  <h2>사고 연산 10개</h2>
+  <p class="sub">문제를 풀 때 머릿속에서 돌아가는 연산들입니다. 각 카드의 질문이 그 연산의 체크 포인트입니다.</p>
+  <div class="ops" id="opsGrid" style="margin-top:18px"></div>
+</section>
+
+<section class="band" id="v-list" hidden>
+  <h2>기록 목록</h2>
+  <p class="sub" id="listSum"></p>
+  <div style="margin-top:14px"><table class="stack"><thead><tr><th>날짜</th><th>출처</th><th>영역</th><th>결과</th><th>끊긴 연산</th><th>오류</th><th>교훈</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
+</section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const AREAS=['독서','문학','화법·작문','언어'];
+const INP=[['S1','개념·원리','독서'],['S2','과정·절차','독서'],['S3','관점 대립','독서'],['S4','통시적 변화','독서'],['S5','문제-해결','독서'],['S6','분류·체계','독서'],['S7','사례-일반화','독서'],['S8','주제 통합','독서'],['L1','현대시','문학'],['L2','고전시가','문학'],['L3','현대소설','문학'],['L4','고전소설','문학'],['L5','극·수필','문학'],['W1','화법·작문','화법·작문'],['G1','문법','언어']];
+const OPS=[
+['O1','정의 대조','선지 속 개념을 지문의 정의 문장과 글자 단위로 맞춘다.','개념어에 □, 정의 문장에 밑줄을 그었나?'],
+['O2','인과 추적','무엇이 원인이고 무엇이 결과인지, 화살표 방향을 확인한다.','A → B 화살표를 직접 그렸나? 선지에서 방향이 뒤집히지 않았나?'],
+['O3','조건·예외 적용','"다만, ~경우에만, ~에 한해" 같은 단서를 적용한다.','단서 문장에 △ 표시를 했나? 선지가 그 조건을 지우지 않았나?'],
+['O4','비교·대조 매핑','두 대상의 공통점과 차이점을 표로 맞춘다.','A ↔ B 를 칸으로 나눠 정리했나? 선지가 비교 대상을 바꾸지 않았나?'],
+['O5','〈보기〉 사례 대입','〈보기〉의 상황을 지문의 원리에 하나씩 대입한다.','〈보기〉의 각 요소를 지문의 어떤 개념과 짝지었는지 말할 수 있나?'],
+['O6','과정 순서 추적','단계가 어떤 순서로 일어나는지 따라간다.','①→②→③ 번호를 매겼나? 선지가 순서를 바꾸지 않았나?'],
+['O7','비례·수치 추론','"~할수록 ~하다" 증감 관계를 따진다.','↑↓ 표시를 했나? 같은 방향인지 반대 방향인지 확인했나?'],
+['O8','주체·관점 식별','이 말을 누가 했는지, 누구의 입장인지 확인한다.','선지의 주어가 지문의 누구인지 손가락으로 짚었나?'],
+['O9','정서·태도 판별','화자·인물의 상황, 정서, 태도와 그 변화를 판별한다.','시어를 + / − 로 나눴나? 정서가 바뀌는 줄을 찾았나?'],
+['O10','개념어 판별','반어, 역설, 음운 변동 같은 용어의 정의를 정확히 적용한다.','그 개념어의 정의를 한 문장으로 말할 수 있나?']];
+const ERRS=[['E1','주체 바꿔치기'],['E2','인과 역전'],['E3','범위 왜곡'],['E4','조건 누락·추가'],['E5','비례 반대'],['E6','지문에 없음'],['E7','비교 오류'],['E8','순서 오류'],['E9','개념어 오용'],['E10','〈보기〉 기준 위반']];
+const RS=[['R1','지문 구조 못 잡음'],['R2','개념·정의 놓침'],['R3','단서·조건 놓침'],['R4','선지를 쪼개지 않고 통째로 판단'],['R5','상식·외부 지식으로 판단'],['R6','〈보기〉 무시하고 내 해석'],['R7','개념어 정의 모름'],['R8','발문 오독'],['R9','시간 부족'],['R10','어휘 뜻 모름']];
+const NAME={};[...INP,...OPS,...ERRS,...RS].forEach(a=>NAME[a[0]]=a[1]);
+
+let db=null,user=null,uid=null,owner=false,mode='local',logs=[],gichul=[],viewing=null,people=[];
+let demo=false,demoLogs=[],mapMode='mine',selected=null;
+const LK='kor-debugger-logs';
+const lget=()=>{try{return JSON.parse(localStorage.getItem(LK)||'[]')}catch(e){return[]}};
+const lset=a=>{try{localStorage.setItem(LK,JSON.stringify(a))}catch(e){}};
+const norm=r=>{const a=Array.isArray(r)?r:(r&&(r.docs||r.items||r.rows))||[];return a.map(d=>{if(d&&typeof d.data==='function')return{...d.data(),id:d.id};if(d&&d.data&&typeof d.data==='object')return{...d.data,id:d.id??d.data.id};return{...d}})};
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2200)};
+const cur=()=>demo?demoLogs:logs;
+
+/* ---------- 데이터 ---------- */
+async function loadLogs(){
+  if(mode!=='db'){logs=lget();return}
+  try{logs=norm(await db.collection(`logs/${viewing}/items`).get())}catch(e){logs=[]}
+  logs.sort((a,b)=>(b.t||0)-(a.t||0));
+}
+async function loadPeople(){
+  try{
+    const ids=norm(await db.collection('logs').get()).map(x=>x.id).filter(Boolean);
+    if(!ids.includes(uid))ids.unshift(uid);
+    const ps=await user.profiles(ids);
+    people=ids.map(id=>({id,name:id===uid?'나':((ps&&ps[id]&&ps[id].name)||'다른 사람')}));
+  }catch(e){people=[{id:uid,name:'나'}]}
+  const w=$('#who');
+  w.hidden=people.length<2;
+  w.innerHTML=people.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}의 기록</option>`).join('');
+  w.value=viewing;
+}
+async function loadGichul(){try{const r=await fetch('gichul.json',{cache:'no-cache'});if(r.ok){const j=await r.json();gichul=Array.isArray(j)?j:[]}}catch(e){gichul=[]}}
+async function addLog(rec){
+  if(mode==='db'){
+    await db.collection(`logs/${uid}/items`).doc(rec.id).set(rec);
+    if(!addLog.reg){try{await db.doc(`logs/${uid}`).set({t:Date.now()});addLog.reg=1}catch(e){}}
+    if(viewing===uid)logs.unshift(rec);
+  }else{logs.unshift(rec);lset(logs)}
+}
+async function delLog(id){
+  if(mode==='db')await db.collection(`logs/${uid}/items`).doc(id).delete();
+  logs=logs.filter(l=>l.id!==id);if(mode!=='db')lset(logs);
+}
+
+/* ---------- 그래프 계산 ---------- */
+function graph(){
+  const ew={},nw={},tri={};
+  const add=(a,b,k=1)=>{const key=a+'>'+b;ew[key]=(ew[key]||0)+k;nw[a]=(nw[a]||0)+k;nw[b]=(nw[b]||0)+k};
+  if(mapMode==='mine'){
+    for(const l of cur()){if(l.ok||!l.bug)continue;if(l.inp)add(l.inp,l.bug);if(l.err)add(l.bug,l.err);const k=[l.inp||'?',l.bug,l.err||'?'].join('|');tri[k]=(tri[k]||0)+1}
+  }else{
+    for(const g of gichul){for(const o of (g.opts||[])){if(!o.err||o.err==='E0')continue;for(const op of (o.ops||[])){if(g.inp)add(g.inp,op);add(op,o.err);const k=[g.inp||'?',op,o.err].join('|');tri[k]=(tri[k]||0)+1}}}
+  }
+  return{ew,nw,tri};
+}
+function rates(){
+  const used={},fail={};
+  for(const l of cur()){const s=new Set(l.ops||[]);if(l.bug)s.add(l.bug);s.forEach(o=>used[o]=(used[o]||0)+1);if(!l.ok&&l.bug)fail[l.bug]=(fail[l.bug]||0)+1}
+  return{used,fail};
+}
+
+/* ---------- 지도 그리기 ---------- */
+const svg=$('#svg');
+function draw(){
+  const W=svg.clientWidth,H=svg.clientHeight;if(!W||!H)return;
+  const narrow=W<640;const {ew,nw}=graph();
+  const xs=[narrow?W*.13:W*.2,W*.5,narrow?W*.87:W*.8],pos={};
+  const lay=(arr,x)=>{const n=arr.length,t=44,b=H-(narrow?70:56);arr.forEach((a,i)=>pos[a[0]]={x,y:t+(b-t)*(n<2?.5:i/(n-1))})};
+  lay(INP,xs[0]);lay(OPS,xs[1]);lay(ERRS,xs[2]);
+  const maxE=Math.max(1,...Object.values(ew)),maxN=Math.max(1,...Object.values(nw));
+  const cls=mapMode==='mine'?'r':'b',hot=mapMode==='mine'?'hot':'hotb';
+  const near=new Set();if(selected){near.add(selected);Object.keys(ew).forEach(k=>{const[a,b]=k.split('>');if(a===selected)near.add(b);if(b===selected)near.add(a)})}
+  let h='';
+  [['지문 유형',0],['사고 연산',1],['선지 오류',2]].forEach(([t,i])=>h+=`<text class="layer" x="${xs[i]}" y="22" text-anchor="middle">${t}</text>`);
+  for(const k in ew){const[a,b]=k.split('>');const p=pos[a],q=pos[b];if(!p||!q)continue;const mx=(p.x+q.x)/2;
+    const on=!selected||a===selected||b===selected;
+    h+=`<path class="edge ${cls}" d="M${p.x},${p.y} C${mx},${p.y} ${mx},${q.y} ${q.x},${q.y}" stroke-width="${(1+ew[k]/maxE*8).toFixed(1)}" stroke-opacity="${on?.55:.07}"/>`}
+  const node=(a,side)=>{const id=a[0],p=pos[id],w=nw[id]||0,r=5+9*Math.sqrt(w/maxN),dim=selected&&!near.has(id);
+    const lab=narrow?id:(side==='m'?a[1]:id+' '+a[1]);
+    let s=`<g opacity="${dim?.3:1}"><circle class="nd ${w?hot:''} ${selected===id?'sel':''}" data-id="${id}" cx="${p.x}" cy="${p.y}" r="${r.toFixed(1)}" tabindex="0" role="button" aria-label="${esc(id+' '+a[1])}"/>`;
+    if(side==='l')s+=`<text class="lb ${w?'':'m'}" x="${p.x-r-7}" y="${p.y+4}" text-anchor="end">${esc(lab)}</text>`;
+    else if(side==='r')s+=`<text class="lb ${w?'':'m'}" x="${p.x+r+7}" y="${p.y+4}">${esc(lab)}</text>`;
+    else{const tw=lab.length*(narrow?8:13)+10;s+=`<rect class="pill" x="${p.x+r+4}" y="${p.y-10}" width="${tw}" height="20" rx="4"/><text class="lb ${w?'':'m'}" x="${p.x+r+9}" y="${p.y+4}">${esc(lab)}</text>`}
+    return s+'</g>'};
+  INP.forEach(a=>h+=node(a,'l'));ERRS.forEach(a=>h+=node(a,'r'));OPS.forEach(a=>h+=node(a,'m'));
+  svg.innerHTML=h;
+  const em=$('#empty'),none=!Object.keys(ew).length;
+  em.hidden=!none;
+  if(none)em.textContent=mapMode==='mine'?'아직 틀린 기록이 없습니다. "문제 기록"에서 틀린 문제를 넣으면 끊긴 경로가 빨간 선으로 나타납니다.':'기출 태깅 데이터가 아직 없습니다. 기출 PDF를 분석하면 출제자가 자주 쓰는 경로가 파란 선으로 채워집니다.';
+}
+const ro=new ResizeObserver(draw);ro.observe(svg);
+svg.addEventListener('click',e=>{const id=e.target.dataset&&e.target.dataset.id;if(!id)return;selected=selected===id?null:id;renderMap()});
+svg.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.dataset.id){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
+
+function renderPanels(){
+  const {tri}=graph();
+  const {used,fail}=rates();
+  const g=graph();
+  let rows=OPS.map(o=>({id:o[0],w:mapMode==='mine'?(fail[o[0]]||0):(g.nw[o[0]]||0),u:used[o[0]]||0})).filter(x=>x.w>0).sort((a,b)=>b.w-a.w).slice(0,6);
+  const mx=Math.max(1,...rows.map(r=>r.w));
+  $('#hub').innerHTML=rows.length?rows.map(r=>{const right=mapMode==='mine'?`${r.w}/${r.u}`:r.w;return`<div class="row"><span>${esc(NAME[r.id])}</span><div class="track"><div class="fill" style="width:${(r.w/mx*100).toFixed(0)}%;${mapMode==='mine'?'':'background:var(--blue)'}"></div></div><span class="num">${right}</span></div>`}).join('')+`<p class="muted">${mapMode==='mine'?'틀린 횟수 / 그 연산을 쓴 문제 수. 맨 위가 이번 주 집중 수리 대상.':'기출에서 오답 선지를 만든 데 쓰인 횟수.'}</p>`:'<p class="muted">데이터가 쌓이면 가장 많이 끊기는 연산이 여기 순위로 나옵니다.</p>';
+  const tr=Object.entries(tri).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  $('#risk').innerHTML=tr.length?tr.map(([k,c])=>{const[a,b,e]=k.split('|');return`<div class="path"><span>${esc(NAME[a]||a)} → <b>${esc(NAME[b]||b)}</b> → ${esc(NAME[e]||e)}</span><span class="num">${c}회</span></div>`}).join('')+'<p class="muted">이런 지문에서 이 연산이 끊기면 이 함정에 걸린다는 뜻입니다.</p>':'<p class="muted">"지문 유형 → 연산 → 오류" 조합 중 반복되는 것이 여기 나옵니다.</p>';
+  renderSel();
+}
+function renderSel(){
+  const t=$('#selT'),b=$('#sel');
+  if(!selected){t.textContent='노드를 눌러 보세요';b.innerHTML='지도에서 원을 누르면 그 연산의 설명, 체크 질문, 관련 기록이 여기 나옵니다.';return}
+  t.textContent=`${selected} ${NAME[selected]||''}`;
+  const op=OPS.find(o=>o[0]===selected);
+  const rel=cur().filter(l=>!l.ok&&(l.bug===selected||l.err===selected||l.inp===selected)).slice(0,5);
+  b.innerHTML=(op?`<p style="margin:0 0 8px">${esc(op[2])}</p><p class="op"><span class="q" style="display:block;background:var(--redbg);border-radius:8px;padding:8px 10px">${esc(op[3])}</span></p>`:'')+
+    (rel.length?'<p style="margin:10px 0 4px"><b>관련 오답</b></p>'+rel.map(l=>`<div class="path"><span>${esc(l.src||'출처 없음')}<br><span class="muted">${esc(l.memo||'')}</span></span><span class="num">${esc(l.d||'')}</span></div>`).join(''):'<p class="muted">이 노드와 연결된 오답 기록이 없습니다.</p>');
+}
+function renderMap(){draw();renderPanels()}
+
+/* ---------- 기록 폼 ---------- */
+const F={area:'독서',inp:null,ok:null,ops:new Set(),bug:null,err:null};
+const chips=(el,arr,isOn,onClick,blue)=>{el.innerHTML=arr.map(a=>`<button type="button" class="chip ${blue?'blue':''} ${isOn(a[0])?'on':''}" data-k="${esc(a[0])}">${esc(a[1])}</button>`).join('');el.onclick=e=>{const k=e.target.dataset.k;if(k){onClick(k);renderForm()}}};
+function renderForm(){
+  chips($('#cArea'),AREAS.map(a=>[a,a]),k=>F.area===k,k=>{F.area=k;F.inp=null});
+  chips($('#cInp'),INP.filter(i=>i[2]===F.area),k=>F.inp===k,k=>F.inp=F.inp===k?null:k);
+  chips($('#cOps'),OPS,k=>F.ops.has(k),k=>F.ops.has(k)?F.ops.delete(k):F.ops.add(k),true);
+  chips($('#cBug'),OPS,k=>F.bug===k,k=>F.bug=F.bug===k?null:k);
+  chips($('#cErr'),ERRS,k=>F.err===k,k=>F.err=F.err===k?null:k);
+  $('#rOk').classList.toggle('on',F.ok===true);$('#rNg').classList.toggle('on',F.ok===false);
+  $('#failBox').hidden=F.ok!==false;
+}
+$('#fR').innerHTML='<option value="">선택 안 함</option>'+RS.map(r=>`<option value="${r[0]}">${r[0]} ${esc(r[1])}</option>`).join('');
+$('#rOk').onclick=()=>{F.ok=true;renderForm()};$('#rNg').onclick=()=>{F.ok=false;renderForm()};
+const today=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+$('#fDate').value=today();
+$('#form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(F.ok===null)return toast('맞음 / 틀림을 골라 주세요');
+  if(!F.ops.size&&F.ok)return toast('쓴 연산을 하나 이상 골라 주세요');
+  if(F.ok===false&&!F.bug)return toast('끊긴 연산을 하나 골라 주세요');
+  if(mode==='db'&&viewing!==uid){viewing=uid;$('#who').value=uid;await loadLogs()}
+  const rec={id:'l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:Date.now(),d:$('#fDate').value||today(),src:$('#fSrc').value.trim(),area:F.area,inp:F.inp,ok:F.ok,ops:[...F.ops],bug:F.ok?null:F.bug,err:F.ok?null:F.err,r:F.ok?null:($('#fR').value||null),memo:$('#fMemo').value.trim()};
+  try{await addLog(rec);toast('저장했습니다');}catch(err){toast('저장하지 못했습니다. 권한을 확인해 주세요');return}
+  Object.assign(F,{inp:null,ok:null,bug:null,err:null});F.ops.clear();$('#fSrc').value='';$('#fMemo').value='';$('#fR').value='';
+  renderForm();renderAll();
+});
+
+/* ---------- 연산 카드 / 목록 ---------- */
+function renderOps(){
+  const {used,fail}=rates();
+  $('#opsGrid').innerHTML=OPS.map(o=>`<div class="card op"><div class="code">${o[0]}</div><h3>${esc(o[1])}</h3><p>${esc(o[2])}</p><p class="q">${esc(o[3])}</p><p class="muted">내 기록: ${fail[o[0]]||0}번 끊김 / ${used[o[0]]||0}문제 사용</p></div>`).join('');
+}
+function renderList(){
+  const L=cur(),ng=L.filter(l=>!l.ok).length;
+  $('#listSum').textContent=L.length?`전체 ${L.length}문제 · 틀림 ${ng} · 맞음 ${L.length-ng}`:'아직 기록이 없습니다.';
+  const mine=!demo&&(mode!=='db'||viewing===uid);
+  $('#tbody').innerHTML=L.map(l=>`<tr><td>${esc(l.d)}</td><td>${esc(l.src)}</td><td>${esc(l.area)}${l.inp?' · '+esc(NAME[l.inp]):''}</td><td>${l.ok?'<span class="ok">맞음</span>':'<span class="ng">틀림</span>'}</td><td>${esc(l.bug?NAME[l.bug]:'')}</td><td>${esc(l.err?NAME[l.err]:'')}${l.r?'<br><span class="muted">'+esc(l.r+' '+NAME[l.r])+'</span>':''}</td><td>${esc(l.memo)}</td><td>${mine?`<button class="chip" data-del="${esc(l.id)}">삭제</button>`:''}</td></tr>`).join('');
+}
+$('#tbody').addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b)return;
+  if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='정말 삭제';setTimeout(()=>{b.dataset.arm='';b.textContent='삭제'},3000);return}
+  try{await delLog(b.dataset.del);toast('삭제했습니다');renderAll()}catch(err){toast('삭제하지 못했습니다')}});
+
+/* ---------- 예시 데이터 (메모리만) ---------- */
+function makeDemo(){
+  const pick=(a,i)=>a[i%a.length];const out=[];
+  const plan=[['S3','O8','E1'],['S3','O8','E1'],['S1','O3','E4'],['S1','O3','E4'],['S2','O6','E8'],['S5','O2','E2'],['S1','O5','E10'],['L1','O9','E10'],['L3','O8','E1'],['S7','O5','E10'],['G1','O10','E9'],['S1','O3','E3'],['L2','O10','E9'],['S4','O2','E2']];
+  for(let i=0;i<40;i++){const fail=i<plan.length;const p=pick(plan,i);const area=p[0][0]==='S'?'독서':p[0][0]==='L'?'문학':'언어';
+    out.push({id:'d'+i,t:i,d:'예시',src:`예시 문항 ${i+1}`,area,inp:p[0],ok:!fail,ops:[p[1],pick(['O1','O4','O2'],i)],bug:fail?p[1]:null,err:fail?p[2]:null,memo:fail?'예시 교훈':''})}
+  return out;
+}
+$('#demoOn').onclick=()=>{demo=true;demoLogs=makeDemo();mapMode='mine';renderAll()};
+$('#demoOff').onclick=()=>{demo=false;renderAll()};
+$('#exp').onclick=()=>{const b=new Blob([JSON.stringify(logs,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='국어기록_'+today()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('백업 파일을 저장했습니다')};
+$('#imp').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const arr=JSON.parse(await f.text());if(!Array.isArray(arr))throw 0;const have=new Set(logs.map(l=>l.id));let n=0;for(const x of arr){if(x&&x.id&&!have.has(x.id)){logs.push(x);n++}}logs.sort((a,b)=>(b.t||0)-(a.t||0));lset(logs);toast(n+'건을 합쳤습니다');renderAll()}catch(err){toast('백업 파일을 읽지 못했습니다')}e.target.value=''};
+
+/* ---------- 공통 ---------- */
+$('#mMine').onclick=()=>{mapMode='mine';selected=null;renderAll()};
+$('#mGichul').onclick=()=>{mapMode='gichul';selected=null;renderAll()};
+$('#who').onchange=async e=>{viewing=e.target.value;await loadLogs();renderAll()};
+function setStatus(){
+  const s=$('#status');
+  if(mode==='db')s.innerHTML=`저장 위치: <b>Claude 계정</b> (휴대폰·PC 어디서 열어도 같은 기록) · 기출 데이터 ${gichul.length}건`;
+  else s.innerHTML=`저장 위치: <b>이 기기의 브라우저</b> · 기출 데이터 ${gichul.length}건 — 기기를 바꾸거나 브라우저 기록을 지우기 전에 '백업 내보내기'를 해 두세요`;
+}
+function renderAll(){
+  $('#demoNote').hidden=!demo;
+  $('#mMine').classList.toggle('on',mapMode==='mine');$('#mGichul').classList.toggle('on',mapMode==='gichul');
+  setStatus();renderMap();renderOps();renderList();
+}
+function route(){
+  const v=(location.hash||'#map').slice(1);const ok=['map','log','ops','list'].includes(v)?v:'map';
+  ['map','log','ops','list'].forEach(k=>$('#v-'+k).hidden=k!==ok);
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+ok));
+  if(ok==='map')requestAnimationFrame(draw);
+}
+window.addEventListener('hashchange',route);
+
+async function init(){
+  logs=lget();renderForm();route();renderAll();
+  await loadGichul();renderAll();
+  const C=window.claude;
+  if(!(C&&C.use)){return}
+  const timer=setTimeout(()=>{if(mode!=='db')setStatus()},10000);
+  try{
+    db=await C.use('db');user=await C.use('user');
+    if(db&&user){
+      uid=await user.id();owner=(await user.isOwner())??false;viewing=uid;mode='db';
+      await Promise.all([loadLogs(),loadGichul()]);
+      await loadPeople();
+    }
+  }catch(e){mode='local';logs=lget()}
+  clearTimeout(timer);renderAll();
+}
+init();
+}
+</script>
+</body>
+</html>
