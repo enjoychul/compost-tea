@@ -145,6 +145,7 @@ th{color:var(--mute);font-weight:500}
 </main>
 <div class="toast" id="toast" role="status"></div>
 
+<script src="sync.js"></script>
 <script>
 {
 const $=s=>document.querySelector(s);
@@ -405,6 +406,7 @@ window.addEventListener('hashchange',route);
 async function init(){
   logs=lget();renderForm();route();renderAll();
   await loadGichul();renderAll();
+  if(window.EV)EV.sync().then(r=>{if(r&&r.ok&&mode!=='db'){logs=lget();renderAll()}}).catch(()=>{});
   const C=window.claude;
   if(!(C&&C.use)){return}
   const timer=setTimeout(()=>{if(mode!=='db')setStatus()},10000);

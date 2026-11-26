@@ -176,6 +176,7 @@ h2{font-size:18px;margin:22px 0 10px}
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="lib/pdf.min.js"></script>
+<script src="sync.js"></script>
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
@@ -426,34 +427,22 @@ addEventListener('popstate',()=>{
 });
 $('#quit').onclick=()=>{if(!leaveGuard())return;if(S&&S.saved)syncNow();goHome()};
 
-/* ---------- 동기화: 폰에 먼저 저장 → 열 때·저장할 때 안 올라간 것부터 올림 ---------- */
-const SENT='everrich-sent';let SYNC=null,syncing=false;
-async function loadSync(){
-  try{const r=await fetch('enc/sync.bin',{cache:'no-cache'});if(!r.ok)return null;
-    return JSON.parse(new TextDecoder().decode(await decrypt(await r.arrayBuffer(),PW)))}catch(e){return null}}
-function pending(){const sent=new Set(store.get(SENT,[]));return logs().filter(l=>l&&l.id&&!sent.has(l.id))}
+/* ---------- 동기화 (sync.js): 안 올라간 기록부터 올리고 → 시트와 똑같이 맞춤 ---------- */
+let SYNC=null;
 function syncLabel(msg){
-  const n=pending().length;
-  $('#syncTxt').textContent=!SYNC?'기록은 이 폰에만 저장됩니다.':msg||(n?`☁️ 올릴 기록 ${n}건 대기 중`:'☁️ 기록이 모두 아빠 시트에 올라가 있습니다');
+  const n=window.EV?EV.pending().length:0;
+  $('#syncTxt').textContent=!SYNC?'기록은 이 기기에만 저장됩니다.':msg||(n?`☁️ 올릴 기록 ${n}건 대기 중`:'☁️ 기록을 저장하여 분석하고 있습니다');
 }
 async function syncNow(){
-  if(!SYNC||syncing)return;const P=pending();if(!P.length){syncLabel();return}
-  if(navigator.onLine===false){syncLabel(`☁️ 오프라인 — ${P.length}건은 다음에 올립니다`);return}
-  syncing=true;syncLabel(`☁️ ${P.length}건 올리는 중…`);
-  try{
-    for(let i=0;i<P.length;i+=50){
-      const chunk=P.slice(i,i+50);
-      const r=await fetch(SYNC.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:SYNC.token,dev:devId(),rows:chunk})});
-      const j=await r.json();if(!j.ok)throw Error(j.err||'거절됨');
-      const sent=new Set(store.get(SENT,[]));chunk.forEach(l=>sent.add(l.id));store.set(SENT,[...sent]);
-    }
-    syncLabel();
-  }catch(e){syncLabel(`☁️ 올리기 실패 — ${pending().length}건은 다음에 다시 올립니다`)}
-  syncing=false;
+  if(!SYNC||!window.EV)return;
+  syncLabel('☁️ 시트와 맞추는 중…');
+  const r=await EV.sync(PW);
+  if(r.offline)syncLabel(`☁️ 오프라인 — ${r.pending}건은 다음에 올립니다`);
+  else if(r.fail)syncLabel(`☁️ 시트 연결 실패 — ${r.pending}건은 다음에 다시 올립니다`);
+  else{if($('#solve').classList.contains('hide'))renderHome();syncLabel()}
 }
-function devId(){let d=store.get('everrich-dev',null);if(!d){d='d'+Math.random().toString(36).slice(2,8);store.set('everrich-dev',d)}return d}
 addEventListener('online',()=>syncNow());
-async function enterHome(){renderHome();show('home');SYNC=await loadSync();syncLabel();syncNow()}
+async function enterHome(){renderHome();show('home');SYNC=window.EV?await EV.config(PW):null;syncLabel();syncNow()}
 
 /* ---------- 시작 ---------- */
 $('#lockForm').onsubmit=async e=>{
