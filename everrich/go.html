@@ -228,7 +228,11 @@ async function openYear(y){
   const key='su'+y;let buf=await idb.get(key);
   if(!buf){setMsg('문제지 내려받는 중… (처음 한 번만)');const r=await fetch(`enc/${key}.bin`);if(!r.ok)throw Error(y+' 문제지 파일이 없습니다');buf=await r.arrayBuffer();idb.put(key,buf)}
   setMsg('잠금 푸는 중…');
-  const data=await decrypt(buf,PW);
+  let data;
+  try{data=await decrypt(buf,PW)}
+  catch(e){ // 비번이 바뀌어 폰에 보관된 옛 파일이 안 풀리면 서버에서 새로 받기
+    setMsg('새 문제지 받는 중…');const r=await fetch(`enc/${key}.bin`,{cache:'no-cache'});if(!r.ok)throw Error(y+' 문제지 파일이 없습니다');
+    buf=await r.arrayBuffer();data=await decrypt(buf,PW);idb.put(key,buf)}
   pdfjsLib.GlobalWorkerOptions.workerSrc='lib/pdf.worker.min.js';
   DOCS[y]=pdfjsLib.getDocument({data,cMapUrl:'lib/cmaps/',cMapPacked:true,standardFontDataUrl:'lib/standard_fonts/'}).promise;
   return DOCS[y];
