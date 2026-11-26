@@ -88,6 +88,8 @@ h2{font-size:18px;margin:22px 0 10px}
 .ch button{width:48px;height:48px;min-height:48px;padding:0;border-radius:50%;font-size:20px;flex:none}
 .ch button.on{background:var(--blue);border-color:var(--blue);color:#fff}
 #submit{margin-top:6px}
+.after{position:sticky;bottom:calc(-1 * max(10px,env(safe-area-inset-bottom)));background:var(--card);padding:8px 0 max(10px,env(safe-area-inset-bottom));display:grid;gap:6px;border-top:1px solid var(--line);margin-top:6px}
+.after button:not(.primary){min-height:44px}
 /* 결과 */
 .res{border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0}
 .res.ng{border-color:var(--red);background:var(--redbg)}
@@ -103,7 +105,7 @@ h2{font-size:18px;margin:22px 0 10px}
 .small{font-size:13px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:15px;z-index:9;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.on{opacity:1}
-@media (min-width:900px){#solve{flex-direction:row;flex-wrap:wrap}#solve .top,#solve .tools{width:100%}#viewer{flex:1 1 60%;height:calc(100% - 110px)}.sheet{flex:0 0 380px;max-height:none;height:calc(100% - 110px);border-top:0;border-left:1px solid var(--line)}}
+@media (min-width:900px){#solve{display:grid;grid-template-columns:1fr 400px;grid-template-rows:auto auto auto minmax(0,1fr)}#solve .top,#solve .clock,#solve .tools{grid-column:1/-1}#viewer{grid-column:1;grid-row:4;min-height:0}.sheet{grid-column:2;grid-row:4;max-height:none;min-height:0;border-top:0;border-left:1px solid var(--line)}}
 </style>
 </head>
 <body>
@@ -242,7 +244,7 @@ async function openYear(y){
     setMsg('새 문제지 받는 중…');const r=await fetch(`enc/${key}.bin`,{cache:'no-cache'});if(!r.ok)throw Error(y+' 문제지 파일이 없습니다');
     buf=await r.arrayBuffer();data=await decrypt(buf,PW);idb.put(key,buf)}
   pdfjsLib.GlobalWorkerOptions.workerSrc='lib/pdf.worker.min.js';
-  DOCS[y]=pdfjsLib.getDocument({data,cMapUrl:'lib/cmaps/',cMapPacked:true,standardFontDataUrl:'lib/standard_fonts/'}).promise;
+  DOCS[y]=pdfjsLib.getDocument({data,cMapUrl:new URL('lib/cmaps/',location.href).href,cMapPacked:true,standardFontDataUrl:new URL('lib/standard_fonts/',location.href).href}).promise;
   return DOCS[y];
 }
 
@@ -295,6 +297,7 @@ async function start(set){
   const lim=({m5:5,m10:10,m20:20})[set.mode]||10;
   S={set,pick:{},conf:{},guess:{},t0:Date.now(),lim:lim*60,page:set.pg[0],view:innerWidth<700?'L':'F',done:false};
   $('#stTitle').innerHTML=`${esc(set.label)}<small>${esc(set.kindTxt)} · ${set.pg.length>1?set.pg[0]+'~'+set.pg.at(-1):set.pg[0]}쪽</small>`;
+  if(!(history.state&&history.state.v==='solve'))history.pushState({v:'solve'},'');
   show('solve');renderTools();renderSheet();
   $('#timer').textContent=lim+'분 목표';$('#clock').classList.remove('hide');
   clearInterval(timerId);tick();timerId=setInterval(tick,1000);
@@ -376,13 +379,14 @@ function grade(){
       <div class="conf">${CONF.map(c=>`<button data-c="${esc(it.id)}" data-v="${c[0]}" class="${S.conf[it.id]===c[0]?'on':''}">${c[1]}</button>`).join('')}</div></div>`}).join('');
   const nOk=s.items.filter(it=>S.pick[it.id]===it.ans).length,nAns=Object.keys(S.pick).length;
   $('#sheet').innerHTML=`<div class="handle"><b>${nOk} / ${nAns} 맞음</b><span class="muted small">${Math.floor(S.sec/60)}분 ${S.sec%60}초 · 위 지문에서 다시 확인해 보세요</span></div>${rows}
-    <button class="primary" id="save">저장하고 끝</button>`;
+    <div class="after"><button class="primary" id="saveNext">저장하고 한 세트 더 (${({m5:5,m10:10,m20:20})[s.mode]||10}분)</button><button id="saveHome">저장하고 홈으로</button></div>`;
   $('#sheet').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{S.conf[b.dataset.c]=S.conf[b.dataset.c]===b.dataset.v?undefined:b.dataset.v;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',S.conf[b.dataset.c]===x.dataset.v))});
   $('#sheet').querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{S.guess[b.dataset.g]=!S.guess[b.dataset.g];b.classList.toggle('on',S.guess[b.dataset.g])});
-  $('#save').onclick=save;
+  $('#saveNext').onclick=()=>save(true);$('#saveHome').onclick=()=>save(false);
   $('#sheet').scrollTop=0;
 }
-function save(){
+function saveRecords(){
+  if(!S||S.saved)return;S.saved=true;
   const s=S.set,L=logs(),now=Date.now(),d=today(),ans=s.items.filter(it=>S.pick[it.id]);
   const per=ans.length?Math.round(S.sec/ans.length):0;const ngs={};
   ans.forEach((it,i)=>{
@@ -399,10 +403,27 @@ function save(){
   const sess=store.get('everrich-sess',[]);
   sess.unshift({t:now,label:s.label,kind:s.kindTxt,n:ans.length,ok:ans.filter(it=>S.pick[it.id]===it.ans).length,ng:Object.keys(ngs).join('·')});
   store.set('everrich-sess',sess.slice(0,50));
-  toast('저장했습니다');S=null;renderHome();show('home');syncLabel();syncNow();
 }
-$('#quit').onclick=()=>{if(S&&!S.done&&Object.keys(S.pick).length&&!confirmQuit())return;clearInterval(timerId);S=null;renderHome();show('home')};
-function confirmQuit(){const b=$('#quit');if(b.dataset.arm){delete b.dataset.arm;return true}b.dataset.arm=1;toast('한 번 더 누르면 기록 없이 나갑니다');setTimeout(()=>delete b.dataset.arm,3000);return false}
+function save(next){
+  const mode=S.set.mode;saveRecords();toast('저장했습니다');syncNow();
+  if(next){S=null;start(choose(mode))}else goHome();
+}
+function goHome(){
+  clearInterval(timerId);
+  if(history.state&&history.state.v==='solve')history.back();   // popstate에서 홈 표시
+  else{S=null;renderHome();show('home');syncLabel()}
+}
+function leaveGuard(){ // 풀던 중(채점 전)에 나가려 하면 한 번 더 확인
+  if(S&&!S.done&&Object.keys(S.pick).length&&!S.armed){S.armed=1;toast('한 번 더 누르면 기록 없이 나갑니다');setTimeout(()=>{if(S)S.armed=0},3000);return false}
+  if(S&&S.done&&!S.saved)saveRecords();   // 채점까지 했으면 자동 저장
+  return true;
+}
+addEventListener('popstate',()=>{
+  if($('#solve').classList.contains('hide'))return;
+  if(!leaveGuard()){history.pushState({v:'solve'},'');return}
+  clearInterval(timerId);S=null;renderHome();show('home');syncLabel();syncNow();
+});
+$('#quit').onclick=()=>{if(!leaveGuard())return;if(S&&S.saved)syncNow();goHome()};
 
 /* ---------- 동기화: 폰에 먼저 저장 → 열 때·저장할 때 안 올라간 것부터 올림 ---------- */
 const SENT='everrich-sent';let SYNC=null,syncing=false;
