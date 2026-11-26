@@ -133,6 +133,7 @@ h2{font-size:18px;margin:22px 0 10px}
   </div>
   <div class="base" id="baseTxt"></div>
   <div class="meter"><i id="baseBar" style="width:0"></i></div>
+  <div class="base" id="syncTxt"></div>
 
   <h2>지금 몇 분 있어?</h2>
   <div class="go">
@@ -398,16 +399,45 @@ function save(){
   const sess=store.get('everrich-sess',[]);
   sess.unshift({t:now,label:s.label,kind:s.kindTxt,n:ans.length,ok:ans.filter(it=>S.pick[it.id]===it.ans).length,ng:Object.keys(ngs).join('·')});
   store.set('everrich-sess',sess.slice(0,50));
-  toast('저장했습니다');S=null;renderHome();show('home');
+  toast('저장했습니다');S=null;renderHome();show('home');syncLabel();syncNow();
 }
 $('#quit').onclick=()=>{if(S&&!S.done&&Object.keys(S.pick).length&&!confirmQuit())return;clearInterval(timerId);S=null;renderHome();show('home')};
 function confirmQuit(){const b=$('#quit');if(b.dataset.arm){delete b.dataset.arm;return true}b.dataset.arm=1;toast('한 번 더 누르면 기록 없이 나갑니다');setTimeout(()=>delete b.dataset.arm,3000);return false}
+
+/* ---------- 동기화: 폰에 먼저 저장 → 열 때·저장할 때 안 올라간 것부터 올림 ---------- */
+const SENT='everrich-sent';let SYNC=null,syncing=false;
+async function loadSync(){
+  try{const r=await fetch('enc/sync.bin',{cache:'no-cache'});if(!r.ok)return null;
+    return JSON.parse(new TextDecoder().decode(await decrypt(await r.arrayBuffer(),PW)))}catch(e){return null}}
+function pending(){const sent=new Set(store.get(SENT,[]));return logs().filter(l=>l&&l.id&&!sent.has(l.id))}
+function syncLabel(msg){
+  const n=pending().length;
+  $('#syncTxt').textContent=!SYNC?'기록은 이 폰에만 저장됩니다.':msg||(n?`☁️ 올릴 기록 ${n}건 대기 중`:'☁️ 기록이 모두 아빠 시트에 올라가 있습니다');
+}
+async function syncNow(){
+  if(!SYNC||syncing)return;const P=pending();if(!P.length){syncLabel();return}
+  if(navigator.onLine===false){syncLabel(`☁️ 오프라인 — ${P.length}건은 다음에 올립니다`);return}
+  syncing=true;syncLabel(`☁️ ${P.length}건 올리는 중…`);
+  try{
+    for(let i=0;i<P.length;i+=50){
+      const chunk=P.slice(i,i+50);
+      const r=await fetch(SYNC.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:SYNC.token,dev:devId(),rows:chunk})});
+      const j=await r.json();if(!j.ok)throw Error(j.err||'거절됨');
+      const sent=new Set(store.get(SENT,[]));chunk.forEach(l=>sent.add(l.id));store.set(SENT,[...sent]);
+    }
+    syncLabel();
+  }catch(e){syncLabel(`☁️ 올리기 실패 — ${pending().length}건은 다음에 다시 올립니다`)}
+  syncing=false;
+}
+function devId(){let d=store.get('everrich-dev',null);if(!d){d='d'+Math.random().toString(36).slice(2,8);store.set('everrich-dev',d)}return d}
+addEventListener('online',()=>syncNow());
+async function enterHome(){renderHome();show('home');SYNC=await loadSync();syncLabel();syncNow()}
 
 /* ---------- 시작 ---------- */
 $('#lockForm').onsubmit=async e=>{
   e.preventDefault();const pw=$('#pw').value.trim();if(!pw)return;
   $('#unlockBtn').disabled=true;$('#lockErr').textContent='확인 중…';
-  try{if(await checkPw(pw)){PW=pw;if($('#remember').checked)store.set(PK,pw);else ss.set(PK,pw);$('#lockErr').textContent='';renderHome();show('home')}
+  try{if(await checkPw(pw)){PW=pw;if($('#remember').checked)store.set(PK,pw);else ss.set(PK,pw);$('#lockErr').textContent='';enterHome()}
       else $('#lockErr').textContent='비번이 맞지 않습니다.'}
   catch(err){$('#lockErr').textContent=err.message||'확인하지 못했습니다'}
   $('#unlockBtn').disabled=false;
@@ -416,7 +446,7 @@ $('#lockForm').onsubmit=async e=>{
   if(!window.crypto||!crypto.subtle){show('lock');$('#lockErr').textContent='이 주소에서는 잠금을 풀 수 없습니다. https:// 로 접속해 주세요.';$('#unlockBtn').disabled=true;return}
   try{await loadData()}catch(e){show('lock');$('#lockErr').textContent=e.message;return}
   const saved=store.get(PK,null)||ss.get(PK);
-  if(saved&&await checkPw(saved).catch(()=>false)){PW=saved;renderHome();show('home')}else show('lock');
+  if(saved&&await checkPw(saved).catch(()=>false)){PW=saved;enterHome()}else show('lock');
 })();
 </script>
 </body>
