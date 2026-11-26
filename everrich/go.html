@@ -23,6 +23,8 @@ button:disabled{opacity:.45;cursor:default}
 input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;min-height:48px;padding:8px 12px;width:100%}
 .hide{display:none!important}
 .muted{color:var(--mute)}
+.hbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tomain{flex:none;text-decoration:none;color:var(--ink);font-weight:700;font-size:15px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;min-height:44px;display:inline-flex;align-items:center}
 .wrap{max-width:560px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) 16px 32px}
 h1{font-size:26px;margin:4px 0 2px;letter-spacing:-.02em}
 h2{font-size:18px;margin:22px 0 10px}
@@ -126,7 +128,7 @@ h2{font-size:18px;margin:22px 0 10px}
 
 <!-- 홈 -->
 <section id="home" class="wrap hide">
-  <h1>짜투리 국어</h1>
+  <div class="hbar"><h1>짜투리 국어</h1><a class="tomain" href="./">🗺 진단 지도</a></div>
   <div class="muted" id="hello">시간 나는 만큼 한 세트.</div>
   <div class="stats">
     <div class="stat"><b id="sToday">0</b><span>오늘 문항</span></div>
@@ -149,7 +151,6 @@ h2{font-size:18px;margin:22px 0 10px}
 
   <div class="foot">
     <button id="pickBtn" type="button">직접 고르기</button>
-    <a href="./">진단 지도 보기</a>
     <button id="lockBtn" type="button">잠그기</button>
   </div>
   <div id="pickBox" class="hide">
