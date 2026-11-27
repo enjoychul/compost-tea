@@ -98,3 +98,17 @@
 @media (prefers-reduced-motion:reduce){
   .hx-main,.hx-main img,.hx-mini-a,.hx-mini-b,.hx-mini img,.hx-glow{animation:none}
 }
+
+/* v9: AI 관제 보드 줄 (터보믹스 줄과 같은 형태, 색만 파랑) */
+.hx-kicker{margin-bottom:10px}
+.hx-kicker.hx-kicker-ai{margin-bottom:26px}
+.hx-kicker-ai svg,.hx-kicker-ai b{color:#2F7BD0}
+.hx-kicker-ai .hx-kicker-brand{color:#2F7BD0;border-color:rgba(47,123,208,.35)}
+.hx-kicker-ai .hx-kicker-brand:hover{background:#2F7BD0;border-color:#2F7BD0;color:#fff}
+.hx-kicker-ai .hx-kicker-brand:focus-visible{outline-color:#2F7BD0}
+.hx-kicker-ai .hx-kicker-brand+.hx-kicker-brand{margin-left:-4px}
+@media (max-width:760px){
+  .hx-kicker{margin-bottom:8px}
+  .hx-kicker.hx-kicker-ai{margin-bottom:16px;gap:6px 8px}
+  .hx-ai-pre{display:none}
+}
